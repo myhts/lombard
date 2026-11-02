@@ -1,0 +1,20 @@
+# Personal learning files stay on this machine: the study notes and exercises in learn/, and the lesson log the
+# pipeline keeps in docs/learning/.
+/learn/
+/docs/learning/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Old Bailey data and anything derived from it (CC BY-NC 4.0): downloaded by a script, never committed
+/data/
+
+# Node and build output
+node_modules/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+.DS_Store
