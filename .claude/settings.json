@@ -1,5 +1,19 @@
 {
   "permissions": {
-    "deny": ["Read(./.env)", "Read(./.env.*)"]
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  },
+  "extraKnownMarketplaces": {
+    "kits": {
+      "source": {
+        "source": "github",
+        "repo": "myhts/claude-kits"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "pipeline@kits": true
   }
 }

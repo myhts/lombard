@@ -1,0 +1,58 @@
+# .github/workflows/human-review.yml: turns "a person reviewed this exact commit" into a status check.
+# /human-review posts its record on the PR as a comment containing <!-- human-review-record sha=<head commit SHA> -->.
+# This workflow sets the commit status "human-review" on the PR's head commit: success when a record for that exact
+# SHA exists, written by someone with write access (OWNER, MEMBER or COLLABORATOR); failure otherwise. A new push
+# moves the head to a commit with no record, so the check turns red again until the new code is reviewed.
+# Branch protection: require the status "human-review" (free on public repos). It's a commit status rather than this
+# job's own check because a comment-triggered run is attached to the default branch, not to the PR.
+# On pull_request, PRs from forks get a read-only token, so their status is set when the record comment arrives.
+name: human-review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  statuses: write                # set the human-review status on the head commit
+  pull-requests: read            # read the PR's head SHA
+  issues: read                   # read the PR's comments (GitHub stores them as issue comments)
+
+concurrency:                     # every run rechecks from scratch, so the newest one is enough
+  group: human-review-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    if: github.event_name == 'pull_request' || github.event.issue.pull_request   # issue comments aren't PR comments
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number || github.event.issue.number }}
+    steps:
+      - name: Look for a review record of the head commit
+        run: |
+          # Ask for the head now rather than trusting the event: a comment can arrive after newer pushes.
+          sha=$(gh api "repos/$GH_REPO/pulls/$PR" --jq .head.sha)
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::unexpected head SHA '$sha'"; exit 1; }
+
+          # Only people with write access count: on a public repo anyone can paste the marker into a comment.
+          export MARKER="<!-- human-review-record sha=$sha -->"
+          # --paginate prints one JSON array per page of comments; jq -s joins them.
+          record=$(gh api --paginate "repos/$GH_REPO/issues/$PR/comments" | jq -rs '[add[]
+            | select(.author_association == "OWNER" or .author_association == "MEMBER" or .author_association == "COLLABORATOR")
+            | select(.body | contains(env.MARKER))][0].html_url // empty')
+
+          if [ -n "$record" ]; then
+            state=success; target=$record
+            desc="Human review recorded for ${sha:0:7}"
+          else
+            state=failure; target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            desc="No human review record for ${sha:0:7}; run /human-review"
+          fi
+          gh api "repos/$GH_REPO/statuses/$sha" -f state="$state" -f context=human-review \
+            -f description="$desc" -f target_url="$target" >/dev/null
+          echo "human-review: $state, $desc" | tee -a "$GITHUB_STEP_SUMMARY"
