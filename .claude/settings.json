@@ -9,7 +9,8 @@
     "kits": {
       "source": {
         "source": "github",
-        "repo": "myhts/claude-kits"
+        "repo": "myhts/claude-kits",
+        "ref": "main"
       }
     }
   },
