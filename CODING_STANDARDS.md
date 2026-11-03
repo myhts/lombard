@@ -36,8 +36,8 @@ kept.
 - **Types are trusted only inside.** Anything that crosses a boundary (a form, a route, a tool input, model output, an
   event, a row from the archive) is parsed with zod first; the type comes from the schema, not from a cast. `as`,
   `any` and non-null `!` need a reason in a comment.
-- **Money is whole pence.** Amounts are integers in pence from input to storage. Pounds, shillings and pence exist only
-  when parsing or displaying, in one place.
+- **Money is whole pence.** The game's amounts are integers in pence from input to storage. Pounds, shillings and pence
+  exist only when parsing or displaying, in one place. LLM spend is integer nano-dollars instead (ADR 0001).
 - **Model calls go through `engine/`.** Code outside it never builds a Claude or Voyage client: the wrapper logs the
   cost, and tests swap it for the HTTP model fake.
 - **Limits live in code, not prompts.** A rule the pawnbroker must obey (a loan limit, what a customer may see) is
