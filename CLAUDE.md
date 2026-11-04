@@ -9,7 +9,8 @@ An AI pawnbroker game set in 1750s London, written in TypeScript. The design is 
   secrets.
 - **Data:** never commit Old Bailey data or anything derived from it (CC BY-NC 4.0). `data/` is git-ignored; the repo
   holds code and the download script only.
-- **Money:** whole pence, as integers, never floats.
+- **Money:** the game's money is whole pence, as integers, never floats. LLM spend is integer nano-dollars
+  (`docs/adr/0001-llm-cost-in-nano-dollars.md`).
 - **Models:** every model call uses Claude Haiku 5.5 (`claude-haiku-5-5`) unless an ADR says otherwise.
 - **API calls in tests:** tests use the HTTP model fake and never call the real APIs. Evals that call the real APIs run
   only when the owner asks.
