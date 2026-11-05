@@ -9,6 +9,10 @@ wrote it; edit it by hand whenever the project changes.
   plan, section 11). With `none`, every stage and agent works the same; what's missing is stack knowledge. The
   standards review uses `CODING_STANDARDS.md` and the smell baseline, and `/deploy` writes its files from the shape
   in its "No pack" list.
+- **Next.js docs:** Next 16 postdates most training data. Before writing Next.js code, read the guide for the installed
+  version in `node_modules/next/dist/docs/`.
+- **Release age:** `pnpm-workspace.yaml` sets `minimumReleaseAge: 20160` (14 days), so pnpm refuses any younger
+  release, transitive ones included. It holds settings only; there's no `packages:` field and this isn't a workspace.
 - **Plugins:** `pipeline@kits`
 
 ## Commands

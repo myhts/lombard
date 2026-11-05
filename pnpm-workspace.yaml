@@ -1,0 +1,4 @@
+# Settings only: no `packages:` field, so this stays one package, not a workspace.
+# Refuse any release younger than 14 days (in minutes), transitive ones included.
+minimumReleaseAge: 20160
+saveExact: true
