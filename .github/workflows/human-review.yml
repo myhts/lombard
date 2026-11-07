@@ -15,17 +15,17 @@ on:
     types: [created, edited]
 
 permissions:
-  statuses: write                # set the human-review status on the head commit
-  pull-requests: read            # read the PR's head SHA
-  issues: read                   # read the PR's comments (GitHub stores them as issue comments)
+  statuses: write # set the human-review status on the head commit
+  pull-requests: read # read the PR's head SHA
+  issues: read # read the PR's comments (GitHub stores them as issue comments)
 
-concurrency:                     # every run rechecks from scratch, so the newest one is enough
+concurrency: # every run rechecks from scratch, so the newest one is enough
   group: human-review-${{ github.event.pull_request.number || github.event.issue.number }}
   cancel-in-progress: true
 
 jobs:
   check:
-    if: github.event_name == 'pull_request' || github.event.issue.pull_request   # issue comments aren't PR comments
+    if: github.event_name == 'pull_request' || github.event.issue.pull_request # issue comments aren't PR comments
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     env:

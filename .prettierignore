@@ -1,0 +1,17 @@
+# Prettier already skips files in .gitignore; these are listed so the rule holds even if .gitignore changes.
+# Secrets: never read them.
+.env*
+# Private study notes and lesson log
+learn/
+docs/learning/
+# The owner's Markdown is wrapped by hand at 120 columns; Prettier would rewrap it.
+*.md
+# Agent permission rules: changed only by the owner.
+.claude/
+# Generated
+.next/
+node_modules/
+coverage/
+next-env.d.ts
+*.tsbuildinfo
+pnpm-lock.yaml
