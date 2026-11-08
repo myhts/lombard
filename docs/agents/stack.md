@@ -17,18 +17,18 @@ wrote it; edit it by hand whenever the project changes.
 
 ## Commands
 
-None exist yet: the walking skeleton (S0) adds `package.json`, its scripts and `ci.yml`. Fill this table in that
-ticket, running each command once.
+Run from the repo root on Node 24 (`nvm use`), with pnpm from Corepack. CI (`.github/workflows/ci.yml`, check
+`verify`) runs the same scripts as separate steps.
 
 | Purpose | Command |
 |---|---|
-| Compile or typecheck (fast) | not set up yet |
-| One test file | not set up yet |
-| Full verify, including container tests | not set up yet |
-| Lint and format check | not set up yet |
-| Module-boundary check | not set up yet (dependency-cruiser, planned) |
-| End-to-end tests | not set up yet (Playwright, planned) |
-| Run locally | not set up yet |
+| Compile or typecheck (fast) | `pnpm typecheck` |
+| One test file | `pnpm test src/config/config.test.ts` (any path or name filter) |
+| Full verify, including container tests | `pnpm verify` (typecheck, lint, format check, boundaries, Vitest; container tests join Vitest in #5) |
+| Lint and format check | `pnpm lint && pnpm format:check` (`pnpm format` rewrites files) |
+| Module-boundary check | `pnpm depcruise` |
+| End-to-end tests | not set up yet (Playwright, #9) |
+| Run locally | `pnpm dev`, then http://localhost:3000. It refuses to start until `.env` holds valid settings (`.env.example`) |
 
 ## Migrations
 

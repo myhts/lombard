@@ -18,7 +18,8 @@
     "format:check": "prettier --check .",
     "depcruise": "depcruise src --config .dependency-cruiser.mjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm depcruise && pnpm test"
   },
   "dependencies": {
     "next": "16.4.2",
