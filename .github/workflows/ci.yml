@@ -1,0 +1,70 @@
+# .github/workflows/ci.yml: the checks a change must pass before it reaches main. Runs on every pull request and every
+# push to main: typecheck, ESLint, the Prettier check, dependency-cruiser's two module-boundary rules and Vitest, each
+# in its own step so a red run names what broke.
+# Branch protection: require the check "verify".
+# No secrets and no API keys: config is checked only when the server starts, no step starts it, and the tests never
+# call a real model.
+# Third-party actions are pinned to a full commit SHA (a tag can be moved; a SHA can't), with the release as a comment.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read # check out the code; nothing else
+
+concurrency: # a newer push to the same PR or branch makes the older run pointless
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false # nothing here pushes, so the token isn't left in .git/config
+
+      # No `cache: pnpm` here: it runs `pnpm store path`, and pnpm only exists once Corepack enables it below.
+      - name: Set up Node from .nvmrc
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable pnpm through Corepack
+        id: pnpm
+        run: |
+          corepack enable
+          # The first pnpm call downloads the version package.json pins in packageManager.
+          pnpm --version
+          echo "store=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the pnpm store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.pnpm.outputs.store }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-store-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint (ESLint)
+        run: pnpm lint
+
+      - name: Format check (Prettier)
+        run: pnpm format:check
+
+      - name: Module boundaries (dependency-cruiser)
+        run: pnpm depcruise
+
+      - name: Unit tests (Vitest)
+        run: pnpm test
