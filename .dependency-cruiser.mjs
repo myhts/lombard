@@ -11,7 +11,30 @@ const config = {
         "The engine is the domain-free module: it may import only itself, Node built-ins and npm packages. It's an " +
         "allowlist, so it also catches domain modules that don't exist yet, whatever they're called.",
       from: { path: "^src/engine/" },
-      to: { path: "^src/", pathNot: "^src/engine/" },
+      // `to` conditions AND together: forbid anything outside src/engine/ that isn't an npm package or a built-in.
+      // Matching every path, not just src/, also catches imports that climb out to test/ or the repo root.
+      to: {
+        pathNot: "^src/engine/",
+        dependencyTypesNot: [
+          "npm",
+          "npm-dev",
+          "npm-optional",
+          "npm-peer",
+          "npm-bundled",
+          "npm-no-pkg",
+          "npm-unknown",
+          "core",
+        ],
+      },
+    },
+    {
+      name: "engine-imports-resolve",
+      severity: "error",
+      comment:
+        "An engine import that doesn't resolve could be anything, so the allowlist above can't vouch for it. This " +
+        "names the cause; the allowlist flags it too.",
+      from: { path: "^src/engine/" },
+      to: { couldNotResolve: true },
     },
     {
       name: "app-imports-no-test-code",

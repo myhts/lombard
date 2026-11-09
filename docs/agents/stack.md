@@ -13,6 +13,8 @@ wrote it; edit it by hand whenever the project changes.
   version in `node_modules/next/dist/docs/`.
 - **Release age:** `pnpm-workspace.yaml` sets `minimumReleaseAge: 20160` (14 days), so pnpm refuses any younger
   release, transitive ones included. It holds settings only; there's no `packages:` field and this isn't a workspace.
+- **Versions held back:** TypeScript is pinned at 6.0.3; TS 7 (plan, section 11) waits until typescript-eslint
+  supports it. Node stays on 24 LTS; Node 26 waits for prebuilt binaries of the Kafka client.
 - **Plugins:** `pipeline@kits`
 
 ## Commands
