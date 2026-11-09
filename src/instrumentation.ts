@@ -7,16 +7,15 @@ export async function register() {
   // which has no process.exit().
   if (process.env.NEXT_RUNTIME === "nodejs") {
     // Imported here, as the Next docs advise, so the Edge bundle never pulls in the config module.
-    const { ConfigError, loadConfig } = await import("./config");
+    const { loadConfig } = await import("./config");
     try {
       loadConfig(process.env);
     } catch (error) {
-      if (!(error instanceof ConfigError)) throw error;
-      // Exit ourselves instead of rethrowing. Tried on Next 16.4.2: when register() throws, `next dev` exits with
-      // code 1, but `next start` logs the error and keeps running, answering every request with HTTP 500, so a
-      // container would look alive. Exiting gives both commands the same clear failure. The message holds variable
-      // names and reasons only, never values.
-      console.error(error.message);
+      // Exit ourselves on any error instead of rethrowing. Tried on Next 16.4.2: when register() throws, `next dev`
+      // exits with code 1, but `next start` logs the error and keeps running, answering every request with HTTP 500,
+      // so a container would look alive. Exiting gives both commands the same clear failure. Logging the error whole
+      // is safe: a ConfigError holds variable names and reasons only, never values.
+      console.error(error);
       process.exit(1);
     }
   }

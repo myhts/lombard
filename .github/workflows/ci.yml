@@ -68,3 +68,7 @@ jobs:
 
       - name: Unit tests (Vitest)
         run: pnpm test
+
+      # `next build` generates the route types and checks the app against them, and proves the bundle compiles.
+      - name: Production build (Next)
+        run: pnpm build
