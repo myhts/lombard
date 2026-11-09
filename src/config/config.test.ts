@@ -100,6 +100,11 @@ describe("loadConfig", () => {
     ["ANTHROPIC_BASE_URL", "http://example.com"],
     ["ANTHROPIC_BASE_URL", "http://10.0.0.5:4010"],
     ["ANTHROPIC_BASE_URL", "ftp://localhost"],
+    // Tricks that make a remote host look local. Both base URLs share one schema, so one variable covers them.
+    ["ANTHROPIC_BASE_URL", "http://localhost.evil.com"],
+    ["ANTHROPIC_BASE_URL", "http://127.0.0.1@evil.com"],
+    ["ANTHROPIC_BASE_URL", "http://localhost."],
+    ["ANTHROPIC_BASE_URL", "http://[::ffff:127.0.0.1]"],
     ["VOYAGE_BASE_URL", "SENTINEL voyage not a url"],
     ["VOYAGE_BASE_URL", "http://example.com"],
     ["VOYAGE_BASE_URL", "http://10.0.0.5:4010"],

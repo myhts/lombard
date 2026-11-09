@@ -1,6 +1,6 @@
 # .github/workflows/ci.yml: the checks a change must pass before it reaches main. Runs on every pull request and every
-# push to main: typecheck, ESLint, the Prettier check, dependency-cruiser's two module-boundary rules and Vitest, each
-# in its own step so a red run names what broke.
+# push to main: typecheck, ESLint, the Prettier check, dependency-cruiser's module-boundary rules, Vitest and a
+# production `next build`, each in its own step so a red run names what broke. `pnpm verify` runs the same locally.
 # Branch protection: require the check "verify".
 # No secrets and no API keys: config is checked only when the server starts, no step starts it, and the tests never
 # call a real model.
@@ -24,6 +24,8 @@ jobs:
     name: verify
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    env:
+      NEXT_TELEMETRY_DISABLED: "1" # don't send Next's anonymous usage data from CI
     steps:
       - name: Check out the code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

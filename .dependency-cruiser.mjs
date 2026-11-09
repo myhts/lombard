@@ -13,18 +13,10 @@ const config = {
       from: { path: "^src/engine/" },
       // `to` conditions AND together: forbid anything outside src/engine/ that isn't an npm package or a built-in.
       // Matching every path, not just src/, also catches imports that climb out to test/ or the repo root.
+      // Only packages declared in package.json count: npm-no-pkg (in node_modules but undeclared) is left out.
       to: {
         pathNot: "^src/engine/",
-        dependencyTypesNot: [
-          "npm",
-          "npm-dev",
-          "npm-optional",
-          "npm-peer",
-          "npm-bundled",
-          "npm-no-pkg",
-          "npm-unknown",
-          "core",
-        ],
+        dependencyTypesNot: ["npm", "npm-dev", "npm-optional", "npm-peer", "npm-bundled", "core"],
       },
     },
     {

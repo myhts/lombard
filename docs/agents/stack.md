@@ -14,7 +14,8 @@ wrote it; edit it by hand whenever the project changes.
 - **Release age:** `pnpm-workspace.yaml` sets `minimumReleaseAge: 20160` (14 days), so pnpm refuses any younger
   release, transitive ones included. It holds settings only; there's no `packages:` field and this isn't a workspace.
 - **Versions held back:** TypeScript is pinned at 6.0.3; TS 7 (plan, section 11) waits until typescript-eslint
-  supports it. Node stays on 24 LTS; Node 26 waits for prebuilt binaries of the Kafka client.
+  supports it. Node stays on 24 LTS; Node 26 waits for prebuilt binaries of the Kafka client. Node 25 and later don't
+  ship Corepack, so that move also needs `npm i -g corepack` before `corepack enable` in CI.
 - **Plugins:** `pipeline@kits`
 
 ## Commands
@@ -26,7 +27,7 @@ Run from the repo root on Node 24 (`nvm use`), with pnpm from Corepack. CI (`.gi
 |---|---|
 | Compile or typecheck (fast) | `pnpm typecheck` |
 | One test file | `pnpm test src/config/config.test.ts` (any path or name filter) |
-| Full verify, including container tests | `pnpm verify` (typecheck, lint, format check, boundaries, Vitest; container tests join Vitest in #5) |
+| Full verify, including container tests | `pnpm verify` (typecheck, lint, format check, boundaries, Vitest, production build; container tests join Vitest in #5) |
 | Lint and format check | `pnpm lint && pnpm format:check` (`pnpm format` rewrites files) |
 | Module-boundary check | `pnpm depcruise` |
 | End-to-end tests | not set up yet (Playwright, #9) |
