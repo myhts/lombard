@@ -36,26 +36,48 @@ describe("loadConfig", () => {
     expect(Object.isFrozen(config.voyage)).toBe(true);
   });
 
-  it("accepts the postgresql:// scheme", () => {
-    const env = { ...validEnv(), DATABASE_URL: "postgresql://lombard@localhost/lombard" };
+  it.each([
+    "postgres://lombard:pw@localhost:5432/lombard",
+    "postgresql://lombard@localhost/lombard",
+    "postgres://u@127.0.0.1/db",
+  ])("accepts %s as DATABASE_URL", (url) => {
+    const env = { ...validEnv(), DATABASE_URL: url };
 
-    expect(loadConfig(env).databaseUrl).toBe("postgresql://lombard@localhost/lombard");
+    expect(loadConfig(env).databaseUrl).toBe(url);
   });
 
-  it.each([undefined, "", "  "])("defaults the Voyage base URL when VOYAGE_BASE_URL is %j", (blank) => {
+  const baseUrlNames = ["ANTHROPIC_BASE_URL", "VOYAGE_BASE_URL"];
+  const acceptedBaseUrls = [
+    "http://127.0.0.1:4010/anthropic",
+    "http://localhost:4010",
+    "http://[::1]:4010",
+    "https://ai.mongodb.com/v1",
+    "https://proxy.example.com",
+  ];
+  it.each(baseUrlNames.flatMap((name) => acceptedBaseUrls.map((url) => [name, url] as const)))(
+    "accepts %s set to %s",
+    (name, url) => {
+      const config = loadConfig({ ...validEnv(), [name]: url });
+
+      expect(name === "ANTHROPIC_BASE_URL" ? config.anthropic.baseUrl : config.voyage.baseUrl).toBe(url);
+    },
+  );
+
+  const blanks = [undefined, "", " \t "];
+
+  it.each(blanks)("defaults the Voyage base URL when VOYAGE_BASE_URL is %j", (blank) => {
     const env = { ...validEnv(), VOYAGE_BASE_URL: blank };
 
     expect(loadConfig(env).voyage.baseUrl).toBe("https://ai.mongodb.com/v1");
   });
 
-  it.each([undefined, "", " \t "])("uses the real Anthropic API when ANTHROPIC_BASE_URL is %j", (blank) => {
+  it.each(blanks)("uses the real Anthropic API when ANTHROPIC_BASE_URL is %j", (blank) => {
     const env = { ...validEnv(), ANTHROPIC_BASE_URL: blank };
 
     expect(loadConfig(env).anthropic.baseUrl).toBeUndefined();
   });
 
   const required = ["DATABASE_URL", "ANTHROPIC_API_KEY", "VOYAGE_API_KEY"];
-  const blanks = [undefined, "", " \t "];
   it.each(required.flatMap((name) => blanks.map((blank) => [name, blank] as const)))(
     "fails naming %s when it is %j",
     (name, blank) => {
@@ -70,9 +92,19 @@ describe("loadConfig", () => {
   it.each([
     ["DATABASE_URL", "mysql://lombard:SENTINEL-db-password@localhost/lombard"],
     ["DATABASE_URL", "SENTINEL-not-a-url"],
+    ["DATABASE_URL", "postgres:foo"],
+    ["DATABASE_URL", "postgresql:/x"],
+    ["DATABASE_URL", "postgres://"],
+    ["DATABASE_URL", "postgres:///db"],
     ["ANTHROPIC_BASE_URL", "SENTINEL anthropic not a url"],
+    ["ANTHROPIC_BASE_URL", "http://example.com"],
+    ["ANTHROPIC_BASE_URL", "http://10.0.0.5:4010"],
+    ["ANTHROPIC_BASE_URL", "ftp://localhost"],
     ["VOYAGE_BASE_URL", "SENTINEL voyage not a url"],
-  ])("fails naming %s when it is malformed", (name, value) => {
+    ["VOYAGE_BASE_URL", "http://example.com"],
+    ["VOYAGE_BASE_URL", "http://10.0.0.5:4010"],
+    ["VOYAGE_BASE_URL", "ftp://localhost"],
+  ])("fails naming %s when it is %s", (name, value) => {
     const env = { ...validEnv(), [name]: value };
 
     expect(configErrorFrom(env).message).toContain(name);
@@ -82,6 +114,7 @@ describe("loadConfig", () => {
     ["another variable is missing", { DATABASE_URL: undefined }],
     ["the secret's own variable is malformed", { DATABASE_URL: "mysql://root:SENTINEL-db-password@db/x" }],
     ["a base URL is malformed", { ANTHROPIC_BASE_URL: "SENTINEL-anthropic-url" }],
+    ["a base URL is plain http to a remote host", { VOYAGE_BASE_URL: "http://SENTINEL.example.com" }],
   ])("never includes a value in the error when %s", (_case, overrides: Env) => {
     const env = { ...validEnv(), ...overrides };
     const error = configErrorFrom(env);

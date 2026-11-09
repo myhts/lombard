@@ -10,24 +10,34 @@ export class ConfigError extends Error {
   override name = "ConfigError";
 }
 
-// Not z.httpUrl(): it demands a domain name and rejects 127.0.0.1 and localhost, where the HTTP model fake runs.
-const httpUrl = () => z.url({ protocol: /^https?$/ });
+// Plain http would send the API key unencrypted, so it is allowed only to this machine, where the HTTP model fake runs.
+// URL keeps the brackets on an IPv6 hostname.
+const localHostnames = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+// Not z.httpUrl(): it demands a domain name and rejects 127.0.0.1 and localhost.
+// zod runs the refine even when the URL check failed, so it must cope with an unparseable value.
+const baseUrl = () =>
+  z.url({ protocol: /^https?$/ }).refine((value) => {
+    const url = URL.parse(value);
+    return url?.protocol === "https:" || localHostnames.has(url?.hostname ?? "");
+  });
 
 const envSchema = z.object({
-  DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  // The URL parser alone accepts "postgres:foo" and "postgres://" with no host.
+  DATABASE_URL: z.url({ hostname: /.+/ }).regex(/^postgres(ql)?:\/\//),
   ANTHROPIC_API_KEY: z.string(),
-  ANTHROPIC_BASE_URL: httpUrl().optional(),
+  ANTHROPIC_BASE_URL: baseUrl().optional(),
   VOYAGE_API_KEY: z.string(),
-  VOYAGE_BASE_URL: httpUrl().default("https://ai.mongodb.com/v1"),
+  VOYAGE_BASE_URL: baseUrl().default("https://ai.mongodb.com/v1"),
 });
 
 type VariableName = keyof typeof envSchema.shape;
 
 // Why a present value was rejected. Only the URL variables can fail that way; the keys only check presence.
 const invalidReason: Partial<Record<VariableName, string>> = {
-  DATABASE_URL: "must be a postgres:// or postgresql:// URL",
-  ANTHROPIC_BASE_URL: "must be an http:// or https:// URL",
-  VOYAGE_BASE_URL: "must be an http:// or https:// URL",
+  DATABASE_URL: "must be a postgres:// or postgresql:// URL with a host",
+  ANTHROPIC_BASE_URL: "must be an https:// URL (http:// only for localhost)",
+  VOYAGE_BASE_URL: "must be an https:// URL (http:// only for localhost)",
 };
 
 export function loadConfig(env: Record<string, string | undefined>): Config {
