@@ -1,0 +1,8 @@
+# Settings only: no `packages:` field, so this stays one package, not a workspace.
+# Refuse any release younger than 14 days (in minutes), transitive ones included.
+minimumReleaseAge: 20160
+saveExact: true
+# Dependency install scripts run only when listed true here. unrs-resolver (pulled in by eslint-config-next) only
+# checks for its native binary, which pnpm already installs as an optional dependency, so its script stays off.
+allowBuilds:
+  unrs-resolver: false

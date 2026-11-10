@@ -14,9 +14,9 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  pull-requests: write           # read the PR's files, label it and comment on it; nothing else
+  pull-requests: write # read the PR's files, label it and comment on it; nothing else
 
-concurrency:                     # a newer push replaces a run that's still counting
+concurrency: # a newer push replaces a run that's still counting
   group: pr-size-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
@@ -32,12 +32,12 @@ jobs:
       GH_REPO: ${{ github.repository }}
       PR: ${{ github.event.pull_request.number }}
       LABEL: size/large
-      MARKER: '<!-- pr-size -->'
+      MARKER: "<!-- pr-size -->"
       # Not counted (a regular expression on the file path): nobody reviews these line by line.
       SKIP: '(^|/)(package-lock\.json|pnpm-lock\.yaml|yarn\.lock|bun\.lockb)$|\.lock$|(^|/)__snapshots__/|\.snap$|(^|/)generated/|(^|/)drizzle/meta/'
     steps:
       - name: Count the changed lines, then label and comment
-        continue-on-error: true  # a GitHub API hiccup or a fork's read-only token must not turn the PR red
+        continue-on-error: true # a GitHub API hiccup or a fork's read-only token must not turn the PR red
         run: |
           # --paginate prints one JSON array per page of 100 files; jq -s joins them.
           total=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/files" \
