@@ -1,0 +1,31 @@
+# compose.yaml: the local Postgres for `pnpm dev` and `pnpm db:migrate`. Start it with `docker compose up -d`
+# (OrbStack), stop it with `docker compose down`; the data stays in the named volume until `down -v`.
+# Local only: the password below is a throwaway dev value, not a secret, and the port is bound to 127.0.0.1 so nothing
+# off this machine can reach it. `.env.example` holds the matching DATABASE_URL.
+name: lombard
+
+services:
+  postgres:
+    # The same image the Testcontainers tests use, so local and CI run one Postgres and one pgvector.
+    # 0.8.6-pg18 is the newest exact tag older than 14 days (the release-age rule pnpm enforces for packages).
+    image: pgvector/pgvector:0.8.6-pg18
+    environment:
+      POSTGRES_USER: lombard
+      POSTGRES_PASSWORD: lombard-dev # local-only, see above
+      POSTGRES_DB: lombard
+    ports:
+      - "127.0.0.1:5432:5432"
+    mem_limit: 512m
+    memswap_limit: 512m # equal to mem_limit, so the container can't swap past it
+    volumes:
+      # pg18 images keep PGDATA under /var/lib/postgresql/18/; a mount at .../data makes the server refuse to start.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      # Over TCP, because the init-time server listens only on the socket: "healthy" means the real server is up.
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "lombard", "-d", "lombard"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  pgdata:

@@ -32,7 +32,7 @@ Run from the repo root on Node 24 (`nvm use`), with pnpm from Corepack. CI (`.gi
 | Lint and format check | `pnpm lint && pnpm format:check` (`pnpm format` rewrites files) |
 | Module-boundary check | `pnpm depcruise` |
 | End-to-end tests | not set up yet (Playwright, #9) |
-| Run locally | `pnpm dev`, then http://127.0.0.1:3000. It refuses to start until `.env` holds valid settings (`.env.example`) |
+| Run locally | `docker compose up -d` (Postgres with pgvector, on OrbStack), then `pnpm dev` and http://127.0.0.1:3000. The app refuses to start until `.env` holds valid settings (`.env.example`). `docker compose down` stops the database and keeps its data |
 
 ## Migrations
 
