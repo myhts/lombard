@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { ConfigError, loadConfig } from "./index";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ConfigError, loadConfig, loadDatabaseConfig } from "./index";
 
 type Env = Record<string, string | undefined>;
 
@@ -12,14 +12,14 @@ const validEnv = (): Env => ({
   VOYAGE_BASE_URL: "http://127.0.0.1:4010/voyage",
 });
 
-function configErrorFrom(env: Env): ConfigError {
+function configErrorFrom(env: Env, load: (env: Env) => unknown = loadConfig): ConfigError {
   try {
-    loadConfig(env);
+    load(env);
   } catch (error) {
     if (error instanceof ConfigError) return error;
     throw error;
   }
-  throw new Error("expected loadConfig to throw a ConfigError");
+  throw new Error("expected the loader to throw a ConfigError");
 }
 
 describe("loadConfig", () => {
@@ -143,5 +143,54 @@ describe("loadConfig", () => {
     expect(message).toContain("ANTHROPIC_API_KEY");
     expect(message).toContain("VOYAGE_BASE_URL");
     expect(message).not.toContain("VOYAGE_API_KEY");
+  });
+});
+
+describe("loadDatabaseConfig", () => {
+  it("needs only DATABASE_URL, not the API keys", () => {
+    const config = loadDatabaseConfig({ DATABASE_URL: validEnv().DATABASE_URL });
+
+    expect(config).toEqual({ databaseUrl: "postgres://lombard:SENTINEL-db-password@localhost:5432/lombard" });
+    expect(Object.isFrozen(config)).toBe(true);
+  });
+
+  // The same message as loadConfig's proves both loaders share one DATABASE_URL rule and one error format.
+  it.each([
+    ["missing", undefined],
+    ["not postgres", "mysql://lombard:SENTINEL-db-password@localhost/lombard"],
+    ["without a host", "postgres:///SENTINEL-db"],
+  ])("fails like loadConfig when DATABASE_URL is %s, without the value", (_case, url) => {
+    const message = configErrorFrom({ DATABASE_URL: url }, loadDatabaseConfig).message;
+
+    expect(message).toBe(configErrorFrom({ ...validEnv(), DATABASE_URL: url }).message);
+    expect(message).toContain("DATABASE_URL");
+    expect(message).not.toContain("SENTINEL");
+  });
+});
+
+describe("getConfig", () => {
+  // A fresh module per test, so each one starts with an empty cache.
+  beforeEach(() => {
+    vi.resetModules();
+    for (const [name, value] of Object.entries(validEnv())) vi.stubEnv(name, value);
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("loads process.env once and returns the same config after", async () => {
+    const { getConfig } = await import("./index");
+    const first = getConfig();
+    vi.stubEnv("DATABASE_URL", "postgres://other@localhost/other");
+
+    expect(getConfig()).toBe(first);
+    expect(first.databaseUrl).toBe(validEnv().DATABASE_URL);
+  });
+
+  it("does not cache a failed load", async () => {
+    const { getConfig } = await import("./index");
+    vi.stubEnv("DATABASE_URL", undefined);
+    expect(() => getConfig()).toThrow("DATABASE_URL: missing");
+
+    vi.stubEnv("DATABASE_URL", validEnv().DATABASE_URL);
+    expect(getConfig().databaseUrl).toBe(validEnv().DATABASE_URL);
   });
 });

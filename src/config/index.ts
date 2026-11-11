@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export type DatabaseConfig = { readonly databaseUrl: string };
+
 export type Config = {
   readonly databaseUrl: string;
   readonly anthropic: { readonly apiKey: string; readonly baseUrl: string | undefined };
@@ -22,9 +24,13 @@ const baseUrl = () =>
     return url?.protocol === "https:" || localHostnames.has(url?.hostname ?? "");
   });
 
-const envSchema = z.object({
+// The one DATABASE_URL rule. loadConfig extends this schema, so both loaders check the database URL the same way.
+const databaseEnvSchema = z.object({
   // The URL parser alone accepts "postgres:foo" and "postgres://" with no host.
   DATABASE_URL: z.url({ hostname: /.+/ }).regex(/^postgres(ql)?:\/\//),
+});
+
+const envSchema = databaseEnvSchema.extend({
   ANTHROPIC_API_KEY: z.string(),
   ANTHROPIC_BASE_URL: baseUrl().optional(),
   VOYAGE_API_KEY: z.string(),
@@ -40,11 +46,13 @@ const invalidReason: Partial<Record<VariableName, string>> = {
   VOYAGE_BASE_URL: "must be an https:// URL (http:// only for localhost)",
 };
 
-export function loadConfig(env: Record<string, string | undefined>): Config {
-  const names = Object.keys(envSchema.shape) as VariableName[]; // Object.keys loses the literal key type.
+type Env = Record<string, string | undefined>;
+
+function parseEnv<Schema extends typeof databaseEnvSchema>(schema: Schema, env: Env): z.output<Schema> {
+  const names = Object.keys(schema.shape) as VariableName[]; // Object.keys loses the literal key type.
   const cleaned = Object.fromEntries(names.map((name) => [name, env[name]?.trim() || undefined]));
 
-  const result = envSchema.safeParse(cleaned);
+  const result = schema.safeParse(cleaned);
   if (!result.success) {
     // Built by hand from variable names and our own reasons: zod's messages and issues can echo the secret input.
     const problems = new Set(
@@ -56,11 +64,28 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     );
     throw new ConfigError(`Invalid configuration:\n${[...problems].join("\n")}`);
   }
+  return result.data;
+}
 
-  const parsed = result.data;
+// For code that needs only the database, such as the migrate command, which runs without the API keys.
+export function loadDatabaseConfig(env: Env): DatabaseConfig {
+  return Object.freeze({ databaseUrl: parseEnv(databaseEnvSchema, env).DATABASE_URL });
+}
+
+export function loadConfig(env: Env): Config {
+  const parsed = parseEnv(envSchema, env);
   return Object.freeze({
     databaseUrl: parsed.DATABASE_URL,
     anthropic: Object.freeze({ apiKey: parsed.ANTHROPIC_API_KEY, baseUrl: parsed.ANTHROPIC_BASE_URL }),
     voyage: Object.freeze({ apiKey: parsed.VOYAGE_API_KEY, baseUrl: parsed.VOYAGE_BASE_URL }),
   });
+}
+
+let cached: Config | undefined;
+
+// The app's one way to read its settings: loads process.env on the first call. A failed load isn't cached, so the next
+// call tries again and throws again.
+export function getConfig(): Config {
+  cached ??= loadConfig(process.env);
+  return cached;
 }
