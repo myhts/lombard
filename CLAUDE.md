@@ -41,14 +41,16 @@ Single context: `GLOSSARY.md` and `docs/adr/` at the root. See `docs/agents/doma
 - **Specs and tickets come from the pipeline, never by hand.**
   - A slice is one ticket: `/to-tickets` with the slice's row in section 12 as its source.
   - Work of several tickets (the interface) goes through `/to-spec` first.
-  - The plan has already made a slice's decisions, so skip `/grill-with-docs` unless something is still unclear.
+  - The plan has already made a slice's decisions, so a slice skips `/grill-with-docs` unless something in it is still
+    unclear. This rule wins over the size rule under **Pipeline** below, which is for work that isn't a slice.
 - **Small first:** a slice starts on the sample sizes in section 12 and is scaled up only after its number exists.
 - **Mode by kind of code:** plumbing in `deliver`, AI logic in build-with-me. The stack card has the table.
 - **Pipeline version:** held between milestones. Don't suggest updating the plugin; the owner decides when.
 
 ## Pipeline
 
-Stack, commands and build mode: `docs/agents/stack.md`. Choose the path by size:
+Stack, commands and build mode: `docs/agents/stack.md`. A slice from section 12 follows **Build order** above. For
+any other work, choose the path by size:
 
 - **Tiny change** (one idea, easy to redo): make it, then open a PR.
 - **Anything bigger:** `/grill-with-docs` first; for an event-driven domain it also loads `event-storming`.
