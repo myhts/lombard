@@ -351,7 +351,7 @@ Versions were checked on npm on 1 November 2026. At S0, each one is pinned to a 
 | Tests | Vitest, Testcontainers, Playwright | 5.0.5 · 12.2.1 · 1.64.1 | Postgres with pgvector, and Kafka, in containers; e2e tests against the model fake |
 | Logs and traces | pino, OpenTelemetry | 10.4.0 | A request id carried through visits, tools and events |
 | Tooling | pnpm, typescript-eslint, Prettier, dependency-cruiser | — | Module boundaries checked in CI |
-| Deploy | Docker; Kubernetes through GitHub Actions | — | `/pipeline:deploy`, with the host picked by a research ticket. Managed Postgres with pgvector; Aiven's free Kafka tier |
+| Deploy | Docker; Fly.io first, then Kubernetes through GitHub Actions | — | Fly.io with Neon's Postgres for the first deploy (slice 9). Kubernetes through `/pipeline:deploy` with "The world moves", the cluster picked by a research ticket; the database stays on Neon |
 
 **Configuration and secrets:**
 - The Anthropic and Voyage keys live in `.env`, which is git-ignored, and in CI secrets. They never go in the repo, the
@@ -396,7 +396,7 @@ event storming happens just before "The world moves".
 | Slice | Built | Done when |
 |---|---|---|
 | **8. The counter page** | • The counter in the browser, streamed, with a trial beside each claim<br>• `take_pledge` as [§6](#6-the-agents) describes it: one transaction, an idempotency key, the outbox row<br>• Every step of a visit saved to a `visit_events` table | An item can be pawned in the browser |
-| **9. Deploy** | • A Docker image and a host ([decision 11](#13-decisions))<br>• The migration runs on release<br>• Invite codes, a switch that closes the shop, and a cap on visits<br>• One end-to-end smoke test | The link works, and the shop can be opened and closed |
+| **9. Deploy** | • A Docker image, built by CI and pushed to GHCR, on Fly.io with Neon's Postgres ([decision 11](#13-decisions))<br>• Built so Kubernetes can reuse it: settings from the environment, two health endpoints, a clean stop, nothing kept on disk, no Fly.io-specific code<br>• The migration runs on release<br>• Invite codes, a switch that closes the shop, and a cap on visits<br>• One end-to-end smoke test | The link works, and the shop can be opened and closed |
 | **10. First players** | • A few invited players<br>• Every transcript read, and each failure added to the casebook | Real visits, and new casebook entries |
 | **11. The whole decade** | • Extraction through the Batch API, with failures re-queued and counted<br>• Everything embedded<br>• The evals from slices 2, 3 and 5 run again | The numbers at full size beside the numbers from the sample |
 | **12. The judge, and 40 visits** | • The judge, checked against 30 transcripts labelled by hand<br>• The frozen set grown to 40 visits | The judge's agreement with the labels is written down; the shop eval runs on 40 |
@@ -412,7 +412,7 @@ only connects finished screens to real data. Its brief is `docs/ui/THEME.md`, wh
 |---|---|
 | **Safety and the red-team loop** | • Stolen-goods notices, `check_notices` and the constable<br>• A database role for the counter, and row-level security on customer history<br>• Leak checks<br>• Player sign-in (decision 10)<br>• A leaderboard; every con that works becomes a frozen eval case<br>• Reranking and contextualized embeddings, each measured against the baseline |
 | **MCP, approvals, memory** | • `lombard-archive` over stdio, then public and read-only<br>• Owner approval for big loans, on a page and then through `lombard-owner`<br>• Memory of regular customers |
-| **The world moves** | • Event storming<br>• The outbox relay to Kafka, and the game clock<br>• Redemptions and forfeits<br>• The notice matcher as a consumer, and a shadow matcher replaying past events<br>• Owner mode's season |
+| **The world moves** | • Event storming<br>• Kubernetes through `/pipeline:deploy`, replacing Fly.io; the workers run as a second Deployment<br>• The outbox relay to Kafka, and the game clock<br>• Redemptions and forfeits<br>• The notice matcher as a consumer, and a shadow matcher replaying past events<br>• Owner mode's season |
 | **Cost, quality, watching it run** | • Prompt caching, with the hit rate measured<br>• Effort `low` against `medium`<br>• Haiku against Sonnet on the shop eval (cost per correct decision)<br>• An eval gate on a PR label<br>• OpenTelemetry, and a load test |
 | **Test users** | • A larger group of invited players<br>• A checklist for reviewing any AI system, drawn from the casebook |
 
@@ -452,7 +452,7 @@ Other sections still name the phases P1 to P6. Read them through this table.
 | 8 | The owner's MCP server uses a personal token; OAuth is a stretch ticket | Decided |
 | 9 | The repo is public; the data is never committed | Decided |
 | 10 | Player sign-in: magic link, passkeys or a hosted provider | Invite codes for the first deployed version (decided 2026-11-13); sign-in soon after, with an ADR |
-| 11 | Hosting: Kubernetes through GitHub Actions; the host is picked by a research ticket | Open again; decided at slice 9 |
+| 11 | Hosting: Fly.io with Neon's Postgres for the first deploy; Kubernetes through GitHub Actions when the workers arrive, the cluster picked by a research ticket | Decided 2026-11-13 |
 | 12 | Game numbers: start at £10, 30 days, three strikes | Tuned in P3 |
 | 13 | MCP SDK: v2 (`@modelcontextprotocol/server`), with v1 as the fallback | Confirmed in P1 |
 | 14 | Build order: AI-first slices, the interface alongside, plumbing when a slice needs it ([§12](#12-build-order)) | Decided 2026-11-13 |

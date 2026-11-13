@@ -65,7 +65,10 @@ Run from the repo root on Node 24 (`nvm use`), with pnpm from Corepack. CI (`.gi
 
 ## Deploy
 
-- **Target:** not chosen yet: run /deploy (a research ticket picks the host; plan, decision 11)
+- **First deploy (slice 9):** Fly.io, with Neon's Postgres. It's an ordinary ticket through `/to-tickets` and
+  `/implement`; don't run `/deploy` for it, because `/deploy` sets up Kubernetes.
+- **Target for `/deploy`:** Kubernetes, with "The world moves" (plan, decision 11). The cluster isn't chosen yet: a
+  research ticket picks the host then. The lines below are for that stage.
 - **Registry:** ghcr.io/myhts/lombard
 - **Cluster and namespaces:** not chosen yet · `lombard-staging`, `lombard-prod`
 - **Overlays:** `k8s/overlays/staging`, `k8s/overlays/prod`
