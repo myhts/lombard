@@ -55,7 +55,13 @@ Run from the repo root on Node 24 (`nvm use`), with pnpm from Corepack. CI (`.gi
   | AI logic: the tool loop, chunking, rank fusion, eval metrics, prompts, tool descriptions, limits, the judge | `/implement <ticket>` (build-with-me) |
 
 - **The owner writes these blocks (MINE):** recall@k, the tool loop, `offer_loan`'s limits, the system prompt and tool
-  descriptions, the price calculation, the approval desk.
+  descriptions, and the approval gate's logic (who decides, what runs after approval, checked again, and only once).
+- **When a ticket holds both kinds of code:**
+  - A screen is interface whatever it shows. The rule the screen acts on belongs to the code behind it. The approval
+    page's look is interface; the approval gate is AI logic.
+  - `/to-tickets` splits such work where it can, so each ticket has one mode.
+  - Where it can't, build-with-me wins: MINE exists only in that mode, so a ticket that holds a MINE block or any AI
+    logic runs in build-with-me, and the implementer takes its plumbing blocks.
 
 ## Pull requests
 
