@@ -10,6 +10,7 @@ docs/learning/
 .claude/
 # Generated
 .next/
+drizzle/
 node_modules/
 coverage/
 next-env.d.ts

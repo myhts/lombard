@@ -4,5 +4,7 @@ minimumReleaseAge: 20160
 saveExact: true
 # Dependency install scripts run only when listed true here. unrs-resolver (pulled in by eslint-config-next) only
 # checks for its native binary, which pnpm already installs as an optional dependency, so its script stays off.
+# esbuild (drizzle-kit) gets its binary from an optional dependency, so its postinstall only re-checks it.
 allowBuilds:
   unrs-resolver: false
+  esbuild: false
