@@ -322,7 +322,7 @@ The rule: **anything that matters is enforced outside the model.** Prompts guide
 | Eval | Measures | Size | Runs |
 |---|---|---|---|
 | Extraction | Field accuracy against hand labels | 50 trials | When the extraction prompt changes |
-| Retrieval | Recall@10 and nDCG@10 for each variant: keywords only, vectors only, hybrid, hybrid plus reranking, contextualized embeddings | 40 questions with the right trials marked by hand | When search changes |
+| Retrieval | Recall@5, recall@10 and nDCG@10 for each variant: keywords only, vectors only, hybrid, hybrid plus reranking, contextualized embeddings | 40 questions with the right trials marked by hand | When search changes |
 | Shop | Correct decisions, cons caught, honest customers refused, profit, valid citations, leaks, limit breaches, cost per correct decision | 40 frozen visits: 20 honest, 12 stolen goods or cons, 8 injection attempts | Before merging a change to prompts or tools (on a PR label) |
 | Judge calibration | How often the judge agrees with hand labels | 30 transcripts | When the judge prompt changes |
 
@@ -400,7 +400,7 @@ that first needs its answer:
 |---|---|---|
 | **1. The archive, small** | • A first sample of 500 theft trials from the 1750s in Postgres<br>• Chunks with a header: trial id, date, offence<br>• Embeddings<br>• A search command | Trials, chunks, tokens embedded, database size |
 | **2. Search you can measure** | • Full-text search<br>• Hybrid search with rank fusion in SQL<br>• The date filter<br>• A gold set of questions with the right trials marked by hand (20 to start) | Recall@5 and recall@10 for keywords, vectors and hybrid |
-| **3. Extraction** | • Items and their values in pence, as structured output checked by zod<br>• Trials labelled by hand (20 to start) | Field accuracy against the labels |
+| **3. Extraction** | • Items and their values in pence, as structured output checked by zod<br>• The item records chunked and embedded, so `appraise` can find comparable items<br>• Trials labelled by hand (20 to start) | Field accuracy against the labels |
 | **4. The pawnbroker talks** | • A terminal chat<br>• The tool loop on the Messages API<br>• The tools `search_records`, `appraise`, `offer_loan` and `refuse`, with the limits in code<br>• A turn cap and `max_tokens` on every visit ([§9](#9-safety-and-permissions)) | Limit breaches: must be 0 |
 | **5. Grounded answers** | • `search_records` returns `search_result` blocks, so each claim cites a trial<br>• A grounding eval that includes items with no comparable record | The share of prices with a retrieved trial behind them; the share of "no record" cases where it says so |
 | **6. Customers and cons** | • Truth cards: honest, stolen goods, injection (10 to start)<br>• The customer agent<br>• The first shop eval, scored by code only | Cons that got a loan, honest customers refused, limit breaches, cost per run |
@@ -411,9 +411,9 @@ that first needs its answer:
 | Slice | Built | Done when |
 |---|---|---|
 | **8. The counter page** | • The counter in the browser, streamed, with a trial beside each claim<br>• `take_pledge` as [§6](#6-the-agents) describes it: one transaction, an idempotency key, the outbox row<br>• The loop moved to the SDK's tool runner (decision 4)<br>• Every step of a visit saved to a `visit_events` table; a model step points at its `llm_calls` row, so one visit's cost can be added up | An item can be pawned in the browser, and the shop eval scores the same on the tool runner as on the first loop |
-| **9. Deploy** | • A Docker image, built by CI and pushed to GHCR, on Fly.io with Neon's Postgres ([decision 11](#13-decisions))<br>• Built so Kubernetes can reuse it: settings from the environment, two health endpoints, a clean stop, nothing kept on disk, no Fly.io-specific code<br>• The migration runs on release<br>• Invite codes, a switch that closes the shop, and a cap on visits<br>• One end-to-end smoke test | The link works, and the shop can be opened and closed |
+| **9. Deploy** | • A Docker image, built by CI and pushed to GHCR, on Fly.io with Neon's Postgres ([decision 11](#13-decisions))<br>• Built so Kubernetes can reuse it: settings from the environment, two health endpoints, a clean stop, nothing kept on disk, no Fly.io-specific code<br>• The migration runs on release<br>• Invite codes, a rate limit per invite code, a switch that closes the shop, and a cap on visits<br>• One end-to-end smoke test | The link works, and the shop can be opened and closed |
 | **10. First players** | • A few invited players<br>• Every transcript read, and each failure added to the casebook | Real visits, and new casebook entries |
-| **11. The whole decade** | • Extraction through the Batch API, with failures re-queued and counted<br>• Everything embedded<br>• The gold set grown from 20 to 40 questions, and the extraction labels from 20 to 50 trials ([§10](#10-evals))<br>• The evals from slices 2, 3 and 5 run again | The numbers at full size beside the numbers from the sample |
+| **11. The whole decade** | • Extraction through the Batch API, with failures re-queued and counted<br>• Passages and item records embedded<br>• The gold set grown from 20 to 40 questions, and the extraction labels from 20 to 50 trials ([§10](#10-evals))<br>• nDCG@10 added to the retrieval eval<br>• The evals from slices 2, 3 and 5 run again | The numbers at full size beside the numbers from the sample |
 | **12. The judge, and 40 visits** | • The judge, checked against 30 transcripts labelled by hand<br>• The frozen set grown to 40 visits | The judge's agreement with the labels is written down; the shop eval runs on 40 |
 | **13. Scoreboard and replay** | • A page of eval runs by version, with cost<br>• A replay of any visit: what the agent saw, each tool call and its result, the cost | Both pages are live |
 | **14. Tell people** | • The README with the measured numbers<br>• The casebook | The README alone explains the project |
