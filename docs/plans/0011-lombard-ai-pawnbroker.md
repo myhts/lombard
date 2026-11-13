@@ -367,8 +367,8 @@ work comes first, in thin slices, and plumbing arrives when a slice needs it.
 
 - Each slice teaches one idea, produces one measured number and adds one thing that can be shown.
 - Each slice is one ticket, made by `/pipeline:to-tickets` from its row below.
-- A slice starts on a sample and is scaled up once its number exists. The starting sizes below are proposed
-  ([decision 15](#13-decisions)).
+- A slice starts on a sample and is scaled up once its number exists ([decision 15](#13-decisions)): 500 trials, 20
+  questions and 10 customers first, then the full sizes in slices 11 and 12.
 
 ### Closing the walking skeleton
 
@@ -383,7 +383,7 @@ event storming happens just before "The world moves".
 
 | Slice | Built | The number |
 |---|---|---|
-| **1. The archive, small** | • A first sample of the 1750s theft trials in Postgres (500 proposed)<br>• Chunks with a header: trial id, date, offence<br>• Embeddings<br>• A search command | Trials, chunks, tokens embedded, database size |
+| **1. The archive, small** | • A first sample of 500 theft trials from the 1750s in Postgres<br>• Chunks with a header: trial id, date, offence<br>• Embeddings<br>• A search command | Trials, chunks, tokens embedded, database size |
 | **2. Search you can measure** | • Full-text search<br>• Hybrid search with rank fusion in SQL<br>• The date filter<br>• A gold set of questions with the right trials marked by hand (20 to start) | Recall@5 and recall@10 for keywords, vectors and hybrid |
 | **3. Extraction** | • Items and their values in pence, as structured output checked by zod<br>• Trials labelled by hand (20 to start) | Field accuracy against the labels |
 | **4. The pawnbroker talks** | • A terminal chat<br>• The tool loop on the Messages API<br>• The tools `search_records`, `appraise`, `offer_loan` and `refuse`, with the limits in code | Limit breaches: must be 0 |
@@ -456,4 +456,4 @@ Other sections still name the phases P1 to P6. Read them through this table.
 | 12 | Game numbers: start at £10, 30 days, three strikes | Tuned in P3 |
 | 13 | MCP SDK: v2 (`@modelcontextprotocol/server`), with v1 as the fallback | Confirmed in P1 |
 | 14 | Build order: AI-first slices, the interface alongside, plumbing when a slice needs it ([§12](#12-build-order)) | Decided 2026-11-13 |
-| 15 | Starting sizes: 500 trials, 20 questions and 10 customers, then the full sizes | Proposed; decided before slice 1 |
+| 15 | Starting sizes: 500 trials, 20 questions and 10 customers, then the full sizes | Decided 2026-11-13 |

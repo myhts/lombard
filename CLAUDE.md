@@ -42,6 +42,7 @@ Single context: `GLOSSARY.md` and `docs/adr/` at the root. See `docs/agents/doma
   - A slice is one ticket: `/to-tickets` with the slice's row in section 12 as its source.
   - Work of several tickets (the interface) goes through `/to-spec` first.
   - The plan has already made a slice's decisions, so skip `/grill-with-docs` unless something is still unclear.
+- **Small first:** a slice starts on the sample sizes in section 12 and is scaled up only after its number exists.
 - **Mode by kind of code:** plumbing in `deliver`, AI logic in build-with-me. The stack card has the table.
 - **Pipeline version:** held between milestones. Don't suggest updating the plugin; the owner decides when.
 
