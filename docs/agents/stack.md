@@ -16,7 +16,8 @@ wrote it; edit it by hand whenever the project changes.
 - **Versions held back:** TypeScript is pinned at 6.0.3; TS 7 (plan, section 11) waits until typescript-eslint
   supports it. Node stays on 24 LTS; Node 26 waits for prebuilt binaries of the Kafka client. Node 25 and later don't
   ship Corepack, so that move also needs `npm i -g corepack` before `corepack enable` in CI.
-- **Plugins:** `pipeline@kits`
+- **Plugins:** `pipeline@kits`, held at 0.5.3 until the owner updates it at a milestone. Never update it in the
+  middle of a ticket or a slice.
 
 ## Commands
 
@@ -46,7 +47,15 @@ Run from the repo root on Node 24 (`nvm use`), with pnpm from Corepack. CI (`.gi
   - **build-with-me:** the implementer writes one block of at most ~60 lines; the human checks it, answers 1–2
     questions and replies OK, CHANGE, MINE or WHY.
   - **deliver:** the implementer builds the whole ticket; the automated review loop runs before the PR.
-- A ticket can override it: `/implement <ticket> deliver`.
+- **By kind of code** (decided 2026-11-13). The default covers AI logic; plumbing overrides it on the command line:
+
+  | Code | Mode |
+  |---|---|
+  | Plumbing: config, CI, migrations, Docker, deploy, page layout, test fakes, the interface | `/implement <ticket> deliver` |
+  | AI logic: the tool loop, chunking, rank fusion, eval metrics, prompts, tool descriptions, limits, the judge | `/implement <ticket>` (build-with-me) |
+
+- **The owner writes these blocks (MINE):** recall@k, the tool loop, `offer_loan`'s limits, the system prompt and tool
+  descriptions, the price calculation, the approval desk.
 
 ## Pull requests
 

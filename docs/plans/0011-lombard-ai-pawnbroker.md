@@ -1,6 +1,7 @@
 # Lombard: an AI pawnbroker in 1750s London
 
-Status: **accepted** (2026-11-02). Building starts with the walking skeleton (S0).
+Status: **accepted** (2026-11-02). The build order was revised on 2026-11-13 ([§12](#12-build-order)); the walking
+skeleton (S0) is closing.
 
 ## 1. What it is
 
@@ -158,7 +159,8 @@ flowchart LR
 
 ### Modules
 
-Event Storming at the Plan stage decides the final boundaries, and dependency-cruiser enforces them.
+Event storming, just before "The world moves" ([§12](#12-build-order)), decides the final boundaries, and
+dependency-cruiser enforces them.
 
 | Module | Owns |
 |---|---|
@@ -358,18 +360,74 @@ Versions were checked on npm on 1 November 2026. At S0, each one is pinned to a 
 
 ## 12. Build order
 
-Each phase ends deployed to staging.
+Revised 2026-11-13. The game, the data, the stack and the safety rules above are unchanged. The order changed: the AI
+work comes first, in thin slices, and plumbing arrives when a slice needs it.
 
-| Phase | Built | Done when |
+**How a slice works:**
+
+- Each slice teaches one idea, produces one measured number and adds one thing that can be shown.
+- Each slice is one ticket, made by `/pipeline:to-tickets` from its row below.
+- A slice starts on a sample and is scaled up once its number exists. The starting sizes below are proposed
+  ([decision 15](#13-decisions)).
+
+### Closing the walking skeleton
+
+S0 ends with tickets #5 to #8: Postgres with pgvector and its migration, the cost meter, one Claude call and one
+Voyage call logged with their cost, and the smoke command. The health page and its end-to-end test (#9) are parked;
+they return, smaller, with the deploy slice.
+
+There is no separate Plan stage. The glossary grows as terms appear, ADRs are written when a decision is made, and
+event storming happens just before "The world moves".
+
+### To the explainable version, which runs locally
+
+| Slice | Built | The number |
 |---|---|---|
-| **S0 Walking skeleton** | • The repo set up for the pipeline, with CI (typecheck, lint, tests)<br>• A health page<br>• Postgres with pgvector, migrated<br>• One Claude call and one Voyage call, each with its cost logged to an `llm_calls` table<br>• A Docker image, deployed to staging | Staging shows the health page and both calls with their cost |
-| **Plan** | • The domain language (visit, pledge, ticket, appraisal, redemption, forfeit, notice) and the event board<br>• Research tickets: the data and its licence, 1750s pawnbroking law and interest, the calendar change, the money<br>• ADRs<br>• Specs and tickets | The glossary, the event board, the ADRs and the tickets all exist |
-| **P1 The archive** | • The decade loaded<br>• Extraction through the Batch API, checked against the 50 labels<br>• Embeddings, hybrid search and reranking<br>• The retrieval eval and its ADR<br>• `lombard-archive` over stdio | The archive answers from Claude Desktop, and both evals have numbers |
-| **P2 The pawnbroker talks** (first playable) | • The counter page<br>• The tool loop on the Messages API, then on the tool runner<br>• The tools: `search_records`, `appraise`, `offer_loan`, `take_pledge`, `refuse`<br>• The ledger and the outbox table<br>• Valuations with citations | An item can be pawned on staging, and every price shown cites a trial |
-| **P3 Customers and cons** | • Truth cards and the customer agent<br>• The simulation harness and the frozen scenario set<br>• The judge and its calibration<br>• Injection cases; RLS and database roles<br>• Player sign-in (ADR) and an invite link<br>• The game numbers tuned | • The shop eval runs end to end with zero limit breaches and zero leaks<br>• An invited player has played |
-| **P4 The world moves** | • The outbox relay to Kafka; the game clock<br>• Redemptions and forfeits<br>• Notices, the matcher and the constable<br>• The audit projection<br>• A shadow matcher replaying past events | • A notice for a stolen gown flags the matching pledge already on the shelf<br>• The replay compares two matcher versions |
-| **P5 The owner** | • Approvals: the visit waits until the owner approves on the page or from Claude Desktop<br>• Memory of regular customers<br>• `lombard-owner` over HTTP, with a token<br>• The day's report | A big loan waits, then goes through when approved from Claude Desktop |
-| **P6 Cost, quality, production** | • Prompt caching, with the hit rate measured<br>• Effort `low` vs `medium`<br>• Haiku vs Sonnet on the shop eval (cost per correct decision)<br>• An eval gate on a PR label<br>• OpenTelemetry and alerts<br>• The archive server made public<br>• Production | Production is live, and the README has the measured numbers |
+| **1. The archive, small** | • A first sample of the 1750s theft trials in Postgres (500 proposed)<br>• Chunks with a header: trial id, date, offence<br>• Embeddings<br>• A search command | Trials, chunks, tokens embedded, database size |
+| **2. Search you can measure** | • Full-text search<br>• Hybrid search with rank fusion in SQL<br>• The date filter<br>• A gold set of questions with the right trials marked by hand (20 to start) | Recall@5 and recall@10 for keywords, vectors and hybrid |
+| **3. Extraction** | • Items and their values in pence, as structured output checked by zod<br>• Trials labelled by hand (20 to start) | Field accuracy against the labels |
+| **4. The pawnbroker talks** | • A terminal chat<br>• The tool loop on the Messages API<br>• The tools `search_records`, `appraise`, `offer_loan` and `refuse`, with the limits in code | Limit breaches: must be 0 |
+| **5. Grounded answers** | • `search_records` returns `search_result` blocks, so each claim cites a trial<br>• A grounding eval that includes items with no comparable record | The share of prices with a retrieved trial behind them; the share of "no record" cases where it says so |
+| **6. Customers and cons** | • Truth cards: honest, stolen goods, injection (10 to start)<br>• The customer agent<br>• The first shop eval, scored by code only | Cons that got a loan, honest customers refused, limit breaches, cost per run |
+| **7. Explain it** | • The first casebook entries in `docs/casebook/`: what failed, the eval case that reproduces it, the fix, the numbers before and after<br>• A one-page explainer | — |
+
+### To the basic, deployed version
+
+| Slice | Built | Done when |
+|---|---|---|
+| **8. The counter page** | • The counter in the browser, streamed, with a trial beside each claim<br>• `take_pledge` as [§6](#6-the-agents) describes it: one transaction, an idempotency key, the outbox row<br>• Every step of a visit saved to a `visit_events` table | An item can be pawned in the browser |
+| **9. Deploy** | • A Docker image and a host ([decision 11](#13-decisions))<br>• The migration runs on release<br>• A switch that closes the shop, and a cap on visits<br>• One end-to-end smoke test | The link works, and the shop can be opened and closed |
+| **10. First players** | • A few invited players<br>• Every transcript read, and each failure added to the casebook | Real visits, and new casebook entries |
+| **11. The whole decade** | • Extraction through the Batch API, with failures re-queued and counted<br>• Everything embedded<br>• The evals from slices 2, 3 and 5 run again | The numbers at full size beside the numbers from the sample |
+| **12. The judge, and 40 visits** | • The judge, checked against 30 transcripts labelled by hand<br>• The frozen set grown to 40 visits | The judge's agreement with the labels is written down; the shop eval runs on 40 |
+| **13. Scoreboard and replay** | • A page of eval runs by version, with cost<br>• A replay of any visit: what the agent saw, each tool call and its result, the cost | Both pages are live |
+| **14. Tell people** | • The README with the measured numbers<br>• The casebook | The README alone explains the project |
+
+**The interface** has its own spec and tickets and is built alongside these slices against made-up data, so slice 8
+only connects finished screens to real data. Its brief is `docs/ui/THEME.md`, which the interface's first ticket adds.
+
+### After that, one theme at a time
+
+| Theme | Built |
+|---|---|
+| **Safety and the red-team loop** | • Stolen-goods notices, `check_notices` and the constable<br>• A database role for the counter, and row-level security on customer history<br>• Leak checks<br>• A leaderboard; every con that works becomes a frozen eval case<br>• Reranking and contextualized embeddings, each measured against the baseline |
+| **MCP, approvals, memory** | • `lombard-archive` over stdio, then public and read-only<br>• Owner approval for big loans, on a page and then through `lombard-owner`<br>• Memory of regular customers |
+| **The world moves** | • Event storming<br>• The outbox relay to Kafka, and the game clock<br>• Redemptions and forfeits<br>• The notice matcher as a consumer, and a shadow matcher replaying past events<br>• Owner mode's season |
+| **Cost, quality, watching it run** | • Prompt caching, with the hit rate measured<br>• Effort `low` against `medium`<br>• Haiku against Sonnet on the shop eval (cost per correct decision)<br>• An eval gate on a PR label<br>• OpenTelemetry, and a load test |
+| **Test users** | • A larger group of invited players<br>• A checklist for reviewing any AI system, drawn from the casebook |
+
+### Where the original phases went
+
+Other sections still name the phases P1 to P6. Read them through this table.
+
+| Phase | Now |
+|---|---|
+| P1 The archive | Slices 1, 2, 3 and 11; the archive MCP server moves to "MCP, approvals, memory" |
+| P2 The pawnbroker talks | Slices 4, 5 and 8 |
+| P3 Customers and cons | Slices 6, 10 and 12, and "Safety and the red-team loop" |
+| P4 The world moves | "The world moves" |
+| P5 The owner | "MCP, approvals, memory" |
+| P6 Cost, quality, production | Slice 9 for the deploy; the rest in "Cost, quality, watching it run" |
 
 **Stretch goals, in any order:**
 
@@ -394,6 +452,8 @@ Each phase ends deployed to staging.
 | 8 | The owner's MCP server uses a personal token; OAuth is a stretch ticket | Decided |
 | 9 | The repo is public; the data is never committed | Decided |
 | 10 | Player sign-in: magic link, passkeys or a hosted provider | P3, with an ADR |
-| 11 | Hosting: Kubernetes through GitHub Actions; the host is picked by a research ticket | S0 |
+| 11 | Hosting: Kubernetes through GitHub Actions; the host is picked by a research ticket | Open again; decided at slice 9 |
 | 12 | Game numbers: start at £10, 30 days, three strikes | Tuned in P3 |
 | 13 | MCP SDK: v2 (`@modelcontextprotocol/server`), with v1 as the fallback | Confirmed in P1 |
+| 14 | Build order: AI-first slices, the interface alongside, plumbing when a slice needs it ([§12](#12-build-order)) | Decided 2026-11-13 |
+| 15 | Starting sizes: 500 trials, 20 questions and 10 customers, then the full sizes | Proposed; decided before slice 1 |

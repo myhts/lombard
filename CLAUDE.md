@@ -34,6 +34,17 @@ decision tickets.
 
 Single context: `GLOSSARY.md` and `docs/adr/` at the root. See `docs/agents/domain.md`.
 
+## Build order
+
+- **Order:** section 12 of the plan. Work one slice at a time, and don't build plumbing the current slice doesn't
+  need: that idea becomes an issue labelled `later`.
+- **Specs and tickets come from the pipeline, never by hand.**
+  - A slice is one ticket: `/to-tickets` with the slice's row in section 12 as its source.
+  - Work of several tickets (the interface) goes through `/to-spec` first.
+  - The plan has already made a slice's decisions, so skip `/grill-with-docs` unless something is still unclear.
+- **Mode by kind of code:** plumbing in `deliver`, AI logic in build-with-me. The stack card has the table.
+- **Pipeline version:** held between milestones. Don't suggest updating the plugin; the owner decides when.
+
 ## Pipeline
 
 Stack, commands and build mode: `docs/agents/stack.md`. Choose the path by size:
