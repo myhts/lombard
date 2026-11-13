@@ -40,6 +40,11 @@ describe("loadConfig", () => {
     "postgres://lombard:pw@localhost:5432/lombard",
     "postgresql://lombard@localhost/lombard",
     "postgres://u@127.0.0.1/db",
+    "postgres://u@[::1]:5432/db",
+    "postgres://u@localhost/db?sslmode=disable",
+    "postgres://u@db.example.com/db?sslmode=require",
+    "postgres://u@db.example.com/db?sslmode=verify-ca",
+    "postgres://u@db.example.com:5432/db?application_name=lombard&sslmode=verify-full",
   ])("accepts %s as DATABASE_URL", (url) => {
     const env = { ...validEnv(), DATABASE_URL: url };
 
@@ -96,6 +101,17 @@ describe("loadConfig", () => {
     ["DATABASE_URL", "postgresql:/x"],
     ["DATABASE_URL", "postgres://"],
     ["DATABASE_URL", "postgres:///db"],
+    // A host other than this machine must use TLS: node-postgres sends plain text unless sslmode asks for it.
+    ["DATABASE_URL", "postgres://u@db.example.com/db"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?ssl=true"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=disable"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=prefer"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=no-verify"],
+    ["DATABASE_URL", "postgres://u@10.0.0.5/db"],
+    // node-postgres uses the last sslmode and lets ?host= replace the URL's host (also how a unix socket is named).
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=require&sslmode=disable"],
+    ["DATABASE_URL", "postgres://u@localhost/db?host=db.example.com"],
+    ["DATABASE_URL", "postgres://u@localhost/db?host=/var/run/postgresql"],
     ["ANTHROPIC_BASE_URL", "SENTINEL anthropic not a url"],
     ["ANTHROPIC_BASE_URL", "http://example.com"],
     ["ANTHROPIC_BASE_URL", "http://10.0.0.5:4010"],
@@ -118,6 +134,7 @@ describe("loadConfig", () => {
   it.each([
     ["another variable is missing", { DATABASE_URL: undefined }],
     ["the secret's own variable is malformed", { DATABASE_URL: "mysql://root:SENTINEL-db-password@db/x" }],
+    ["a remote database URL has no sslmode", { DATABASE_URL: "postgres://u:SENTINEL-db-password@db.example.com/x" }],
     ["a base URL is malformed", { ANTHROPIC_BASE_URL: "SENTINEL-anthropic-url" }],
     ["a base URL is plain http to a remote host", { VOYAGE_BASE_URL: "http://SENTINEL.example.com" }],
   ])("never includes a value in the error when %s", (_case, overrides: Env) => {
@@ -133,6 +150,12 @@ describe("loadConfig", () => {
       for (const text of exposed) expect(text).not.toContain(value);
     }
     expect(exposed.join("\n")).not.toContain("SENTINEL");
+  });
+
+  it("says a remote database needs sslmode", () => {
+    const env = { ...validEnv(), DATABASE_URL: "postgres://u@db.example.com/db" };
+
+    expect(configErrorFrom(env).message).toContain("sslmode=require, verify-ca or verify-full");
   });
 
   it("names every problem in one error", () => {

@@ -24,10 +24,26 @@ const baseUrl = () =>
     return url?.protocol === "https:" || localHostnames.has(url?.hostname ?? "");
   });
 
+const tlsSslModes = new Set(["require", "verify-ca", "verify-full"]);
+
+// node-postgres turns TLS off unless sslmode asks for it, so a database off this machine must ask. It uses the last
+// sslmode given, so every one must ask. A ?host= parameter would replace the URL's host (it's also how a unix socket
+// is named), so it's refused outright.
+function isLocalOrUsesTls(value: string): boolean {
+  const url = URL.parse(value);
+  if (!url || url.searchParams.has("host")) return false;
+  if (localHostnames.has(url.hostname)) return true;
+  const sslModes = url.searchParams.getAll("sslmode");
+  return sslModes.length > 0 && sslModes.every((mode) => tlsSslModes.has(mode));
+}
+
 // The one DATABASE_URL rule. loadConfig extends this schema, so both loaders check the database URL the same way.
 const databaseEnvSchema = z.object({
   // The URL parser alone accepts "postgres:foo" and "postgres://" with no host.
-  DATABASE_URL: z.url({ hostname: /.+/ }).regex(/^postgres(ql)?:\/\//),
+  DATABASE_URL: z
+    .url({ hostname: /.+/ })
+    .regex(/^postgres(ql)?:\/\//)
+    .refine(isLocalOrUsesTls),
 });
 
 const envSchema = databaseEnvSchema.extend({
@@ -41,7 +57,9 @@ type VariableName = keyof typeof envSchema.shape;
 
 // Why a present value was rejected. Only the URL variables can fail that way; the keys only check presence.
 const invalidReason: Partial<Record<VariableName, string>> = {
-  DATABASE_URL: "must be a postgres:// or postgresql:// URL with a host",
+  DATABASE_URL:
+    "must be a postgres:// or postgresql:// URL with a host, and a host other than localhost needs sslmode=require, " +
+    "verify-ca or verify-full",
   ANTHROPIC_BASE_URL: "must be an https:// URL (http:// only for localhost)",
   VOYAGE_BASE_URL: "must be an https:// URL (http:// only for localhost)",
 };
