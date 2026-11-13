@@ -36,10 +36,13 @@ Single context: `GLOSSARY.md` and `docs/adr/` at the root. See `docs/agents/doma
 
 ## Build order
 
-- **Order:** section 12 of the plan. Work one slice at a time, and don't build plumbing the current slice doesn't
-  need: that idea becomes an issue labelled `later`.
+- **Order:** section 12 of the plan. Work one slice at a time, and build only what the current slice's row lists.
+  Anything else, whether plumbing or a technique the plan schedules later (reranking, caching, a bigger model),
+  becomes an issue labelled `later`. Don't pull it forward yourself, even to fix a poor number: say which eval shows
+  the need, and the owner decides.
 - **Specs and tickets come from the pipeline, never by hand.**
-  - A slice is one ticket: `/to-tickets` with the slice's row in section 12 as its source.
+  - A slice goes through `/to-tickets` with its row in section 12 as the source. Most slices come out as one
+    ticket. A row with more than one PR's work (slices 8, 9 and 13) comes out as a few, each within the PR budget.
   - Work of several tickets (the interface) goes through `/to-spec` first.
   - The plan has already made a slice's decisions, so a slice skips `/grill-with-docs` unless something in it is still
     unclear. This rule wins over the size rule under **Pipeline** below, which is for work that isn't a slice.

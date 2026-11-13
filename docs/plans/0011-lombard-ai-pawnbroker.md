@@ -368,7 +368,10 @@ work comes first, in thin slices, and plumbing arrives when a slice needs it.
 **How a slice works:**
 
 - Each slice teaches one idea, produces one measured number and adds one thing that can be shown.
-- Each slice is one ticket, made by `/pipeline:to-tickets` from its row below.
+- Each slice's tickets are made by `/pipeline:to-tickets` from its row below. Most slices are one ticket. Slices 8, 9
+  and 13 hold more than one pull request's work, so each becomes a few tickets.
+- A slice builds only what its row lists. A technique scheduled later is pulled forward only when an eval shows the
+  need and the owner agrees.
 - A slice starts on a sample and is scaled up once its number exists ([decision 15](#13-decisions)): 500 trials, 20
   questions and 10 customers first, then the full sizes in slices 11 and 12.
 
