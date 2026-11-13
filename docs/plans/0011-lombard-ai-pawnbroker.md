@@ -1,6 +1,7 @@
 # Lombard: an AI pawnbroker in 1750s London
 
-Status: **accepted** (2026-11-02). Building starts with the walking skeleton (S0).
+Status: **accepted** (2026-11-02). The build order was revised on 2026-11-13 ([§12](#12-build-order)); the walking
+skeleton (S0) is closing.
 
 ## 1. What it is
 
@@ -67,8 +68,9 @@ The AI is always the pawnbroker. A person plays one of two roles.
 - **The owner loses** after three strikes, when the magistrate closes the shop.
 - **Turning honest customers away costs reputation**, so fewer customers come.
 
-The numbers (starting till, season length, strikes, reputation, interest) are game rules. P3 tunes them so that
-neither "refuse everyone" nor "lend to everyone" can win. The real 1750s interest rules come from a research ticket.
+The numbers (starting till, season length, strikes, reputation, interest) are game rules. They are tuned with owner
+mode's season, in "The world moves" ([§12](#12-build-order)), so that neither "refuse everyone" nor "lend to everyone"
+can win. The real 1750s interest rules come from a research ticket in the same theme.
 
 ### Scoring the pawnbroker
 
@@ -158,7 +160,8 @@ flowchart LR
 
 ### Modules
 
-Event Storming at the Plan stage decides the final boundaries, and dependency-cruiser enforces them.
+Event storming, just before "The world moves" ([§12](#12-build-order)), decides the final boundaries, and
+dependency-cruiser enforces them.
 
 | Module | Owns |
 |---|---|
@@ -231,8 +234,9 @@ A new matcher or prompt version runs as a shadow consumer group over past events
   the cash itself, so there's nothing for the agent to leak.
 - **Tool inputs are untrusted:** every input is validated with zod before it runs, and a validation failure goes back
   to the model as a `tool_result` with `is_error`.
-- **The loop:** the first version calls the Messages API directly (`stop_reason`, `tool_use`, `tool_result`). It then
-  moves to the SDK's tool runner, with zod tools (`betaZodTool`) and `strict: true`.
+- **The loop:** the first version calls the Messages API directly (`stop_reason`, `tool_use`, `tool_result`), in
+  slice 4. It moves to the SDK's tool runner, with zod tools (`betaZodTool`) and `strict: true`, in slice 8, and the
+  shop eval from slice 6 must score the same on both.
 
 ### The customer
 
@@ -292,8 +296,8 @@ trial, linked.
 
 | Server | Tools | Transport | When |
 |---|---|---|---|
-| `lombard-archive` | `search_trials`, `get_trial`, `price_history` | stdio for Claude Desktop and Claude Code. Later, Streamable HTTP for a public, read-only, rate-limited endpoint | P1 (stdio), P6 (remote) |
-| `lombard-owner` | `pending_approvals`, `approve_loan`, `day_report`, `ledger_summary` | Streamable HTTP with a personal token. OAuth (the MCP authorization spec) is a stretch ticket | P5 |
+| `lombard-archive` | `search_trials`, `get_trial`, `price_history` | stdio for Claude Desktop and Claude Code. Later, Streamable HTTP for a public, read-only, rate-limited endpoint | "MCP, approvals, memory": stdio first, then the remote endpoint |
+| `lombard-owner` | `pending_approvals`, `approve_loan`, `day_report`, `ledger_summary` | Streamable HTTP with a personal token. OAuth (the MCP authorization spec) is a stretch ticket | "MCP, approvals, memory" |
 
 **One implementation, two adapters:** each tool is an application function with a zod schema. The agent wraps it as a
 Claude tool, and the server registers it as an MCP tool. The servers use the official TypeScript SDK and are tested
@@ -318,7 +322,7 @@ The rule: **anything that matters is enforced outside the model.** Prompts guide
 | Eval | Measures | Size | Runs |
 |---|---|---|---|
 | Extraction | Field accuracy against hand labels | 50 trials | When the extraction prompt changes |
-| Retrieval | Recall@10 and nDCG@10 for each variant: keywords only, vectors only, hybrid, hybrid plus reranking, contextualized embeddings | 40 questions with the right trials marked by hand | When search changes |
+| Retrieval | Recall@5, recall@10 and nDCG@10 for each variant: keywords only, vectors only, hybrid, hybrid plus reranking, contextualized embeddings | 40 questions with the right trials marked by hand | When search changes |
 | Shop | Correct decisions, cons caught, honest customers refused, profit, valid citations, leaks, limit breaches, cost per correct decision | 40 frozen visits: 20 honest, 12 stolen goods or cons, 8 injection attempts | Before merging a change to prompts or tools (on a PR label) |
 | Judge calibration | How often the judge agrees with hand labels | 30 transcripts | When the judge prompt changes |
 
@@ -345,11 +349,11 @@ Versions were checked on npm on 1 November 2026. At S0, each one is pinned to a 
 | Database | Postgres 18 with pgvector | image `pgvector/pgvector:pg18` (pgvector 0.8.7) | HNSW indexes, full-text search, RLS, roles |
 | ORM | Drizzle and drizzle-kit | 0.45.4 · 0.31.11 | Vector columns and RLS policies declared in the schema; raw SQL for rank fusion |
 | Archive loading | DuckDB (`@duckdb/node-api`) | 1.5.6 (2.0 is a release candidate) | Reads the Parquet straight from Hugging Face |
-| Events | Kafka, with `@confluentinc/kafka-javascript` | 1.11.0 | From P4, through the outbox relay |
+| Events | Kafka, with `@confluentinc/kafka-javascript` | 1.11.0 | From "The world moves", through the outbox relay. One container locally and in tests. For the deployed version its host is chosen in that theme: in the cluster if the node has the memory, otherwise Aiven's free tier, whose five topics set the budget in [§4](#kafka-topics-from-p4) |
 | Tests | Vitest, Testcontainers, Playwright | 5.0.5 · 12.2.1 · 1.64.1 | Postgres with pgvector, and Kafka, in containers; e2e tests against the model fake |
 | Logs and traces | pino, OpenTelemetry | 10.4.0 | A request id carried through visits, tools and events |
 | Tooling | pnpm, typescript-eslint, Prettier, dependency-cruiser | — | Module boundaries checked in CI |
-| Deploy | Docker; Kubernetes through GitHub Actions | — | `/pipeline:deploy`, with the host picked by a research ticket. Managed Postgres with pgvector; Aiven's free Kafka tier |
+| Deploy | Docker; Fly.io first, then Kubernetes through GitHub Actions | — | Fly.io with Neon's Postgres for the first deploy (slice 9). Kubernetes through `/pipeline:deploy` with "The world moves", the cluster picked by a research ticket; the database stays on Neon |
 
 **Configuration and secrets:**
 - The Anthropic and Voyage keys live in `.env`, which is git-ignored, and in CI secrets. They never go in the repo, the
@@ -358,18 +362,87 @@ Versions were checked on npm on 1 November 2026. At S0, each one is pinned to a 
 
 ## 12. Build order
 
-Each phase ends deployed to staging.
+Revised 2026-11-13. The game, the data, the stack and the safety rules above are unchanged. The order changed: the AI
+work comes first, in thin slices, and plumbing arrives when a slice needs it.
 
-| Phase | Built | Done when |
+**How a slice works:**
+
+- Each slice teaches one idea, produces one measured number and adds one thing that can be shown.
+- Each slice's tickets are made by `/pipeline:to-tickets` from its row below. Most slices are one ticket. Slices 8, 9
+  and 13 hold more than one pull request's work, so each becomes a few tickets.
+- A slice builds only what its row lists. A technique scheduled later is pulled forward only when an eval shows the
+  need and the owner agrees.
+- A slice starts on a sample and is scaled up once its number exists ([decision 15](#13-decisions)): 500 trials, 20
+  questions and 10 customers first, then the full sizes in slices 11 and 12.
+
+### Closing the walking skeleton
+
+S0 ends with tickets #5 to #8: Postgres with pgvector and its migration, the cost meter, one Claude call and one
+Voyage call logged with their cost, and the smoke command. The health page and its end-to-end test (#9) are parked;
+they return, smaller, with the deploy slice. Spec #2 says S0 is done "when staging shows the health page"; that
+condition moves to slice 9, and the spec closes when #8 merges.
+
+There is no separate Plan stage. The glossary grows as terms appear, ADRs are written when a decision is made, and
+event storming happens just before "The world moves". Each research question becomes a research ticket in the slice
+that first needs its answer:
+
+| Research | Needed by | Why there |
 |---|---|---|
-| **S0 Walking skeleton** | • The repo set up for the pipeline, with CI (typecheck, lint, tests)<br>• A health page<br>• Postgres with pgvector, migrated<br>• One Claude call and one Voyage call, each with its cost logged to an `llm_calls` table<br>• A Docker image, deployed to staging | Staging shows the health page and both calls with their cost |
-| **Plan** | • The domain language (visit, pledge, ticket, appraisal, redemption, forfeit, notice) and the event board<br>• Research tickets: the data and its licence, 1750s pawnbroking law and interest, the calendar change, the money<br>• ADRs<br>• Specs and tickets | The glossary, the event board, the ADRs and the tickets all exist |
-| **P1 The archive** | • The decade loaded<br>• Extraction through the Batch API, checked against the 50 labels<br>• Embeddings, hybrid search and reranking<br>• The retrieval eval and its ADR<br>• `lombard-archive` over stdio | The archive answers from Claude Desktop, and both evals have numbers |
-| **P2 The pawnbroker talks** (first playable) | • The counter page<br>• The tool loop on the Messages API, then on the tool runner<br>• The tools: `search_records`, `appraise`, `offer_loan`, `take_pledge`, `refuse`<br>• The ledger and the outbox table<br>• Valuations with citations | An item can be pawned on staging, and every price shown cites a trial |
-| **P3 Customers and cons** | • Truth cards and the customer agent<br>• The simulation harness and the frozen scenario set<br>• The judge and its calibration<br>• Injection cases; RLS and database roles<br>• Player sign-in (ADR) and an invite link<br>• The game numbers tuned | • The shop eval runs end to end with zero limit breaches and zero leaks<br>• An invited player has played |
-| **P4 The world moves** | • The outbox relay to Kafka; the game clock<br>• Redemptions and forfeits<br>• Notices, the matcher and the constable<br>• The audit projection<br>• A shadow matcher replaying past events | • A notice for a stolen gown flags the matching pledge already on the shelf<br>• The replay compares two matcher versions |
-| **P5 The owner** | • Approvals: the visit waits until the owner approves on the page or from Claude Desktop<br>• Memory of regular customers<br>• `lombard-owner` over HTTP, with a token<br>• The day's report | A big loan waits, then goes through when approved from Claude Desktop |
-| **P6 Cost, quality, production** | • Prompt caching, with the hit rate measured<br>• Effort `low` vs `medium`<br>• Haiku vs Sonnet on the shop eval (cost per correct decision)<br>• An eval gate on a PR label<br>• OpenTelemetry and alerts<br>• The archive server made public<br>• Production | Production is live, and the README has the measured numbers |
+| The calendar change of 1752, and how the records store dates | Slice 1 | Trials are loaded with their dates, and slice 2 filters on them |
+| The money: how values are written, and pounds, shillings and pence | Slice 3 | Extraction turns values as written into pence |
+| Values set just under a capital threshold | Slice 4 | `appraise` flags them; the treatment is an ADR |
+| The data's licence and attribution | Settled in [§3](#3-the-data); the attribution lands in slice 9 | The footer and README go public there |
+| 1750s pawnbroking law and interest | "The world moves" | Redemptions, forfeits and interest arrive there |
+
+### To the explainable version, which runs locally
+
+| Slice | Built | The number |
+|---|---|---|
+| **1. The archive, small** | • A first sample of 500 theft trials from the 1750s in Postgres<br>• Chunks with a header: trial id, date, offence<br>• Embeddings<br>• A search command | Trials, chunks, tokens embedded, database size |
+| **2. Search you can measure** | • Full-text search<br>• Hybrid search with rank fusion in SQL<br>• The date filter<br>• A gold set of questions with the right trials marked by hand (20 to start) | Recall@5 and recall@10 for keywords, vectors and hybrid |
+| **3. Extraction** | • Items and their values in pence, as structured output checked by zod<br>• The item records chunked and embedded, so `appraise` can find comparable items<br>• Trials labelled by hand (20 to start) | Field accuracy against the labels |
+| **4. The pawnbroker talks** | • A terminal chat<br>• The tool loop on the Messages API<br>• The tools `search_records`, `appraise`, `offer_loan` and `refuse`, with the limits in code<br>• A turn cap and `max_tokens` on every visit ([§9](#9-safety-and-permissions)) | Limit breaches: must be 0 |
+| **5. Grounded answers** | • `search_records` returns `search_result` blocks, so each claim cites a trial<br>• A grounding eval that includes items with no comparable record | The share of prices with a retrieved trial behind them; the share of "no record" cases where it says so |
+| **6. Customers and cons** | • Truth cards: honest, stolen goods, injection (10 to start)<br>• The customer agent<br>• The first shop eval, scored by code only | Cons that got a loan, honest customers refused, limit breaches, cost per run |
+| **7. Explain it** | • The first casebook entries in `docs/casebook/`: what failed, the eval case that reproduces it, the fix, the numbers before and after<br>• A one-page explainer | — |
+
+### To the basic, deployed version
+
+| Slice | Built | Done when |
+|---|---|---|
+| **8. The counter page** | • The counter in the browser, streamed, with a trial beside each claim<br>• `take_pledge` as [§6](#6-the-agents) describes it: one transaction, an idempotency key, the outbox row<br>• The loop moved to the SDK's tool runner (decision 4)<br>• Every step of a visit saved to a `visit_events` table; a model step points at its `llm_calls` row, so one visit's cost can be added up | An item can be pawned in the browser, and the shop eval scores the same on the tool runner as on the first loop |
+| **9. Deploy** | • A Docker image, built by CI and pushed to GHCR, on Fly.io with Neon's Postgres ([decision 11](#13-decisions))<br>• Built so Kubernetes can reuse it: settings from the environment, two health endpoints, a clean stop, nothing kept on disk, no Fly.io-specific code<br>• The migration runs on release<br>• Invite codes, a rate limit per invite code, a switch that closes the shop, and a cap on visits<br>• One end-to-end smoke test | The link works, and the shop can be opened and closed |
+| **10. First players** | • A few invited players<br>• Every transcript read, and each failure added to the casebook | Real visits, and new casebook entries |
+| **11. The whole decade** | • Extraction through the Batch API, with failures re-queued and counted<br>• Passages and item records embedded<br>• The gold set grown from 20 to 40 questions, and the extraction labels from 20 to 50 trials ([§10](#10-evals))<br>• nDCG@10 added to the retrieval eval<br>• The evals from slices 2, 3 and 5 run again | The numbers at full size beside the numbers from the sample |
+| **12. The judge, and 40 visits** | • The judge, checked against 30 transcripts labelled by hand<br>• The frozen set grown to 40 visits | The judge's agreement with the labels is written down; the shop eval runs on 40 |
+| **13. Scoreboard and replay** | • A page of eval runs by version, with cost<br>• A replay of any visit: what the agent saw, each tool call and its result, the cost | Both pages are live |
+| **14. Tell people** | • The README with the measured numbers<br>• The casebook | The README alone explains the project |
+
+**The interface** has its own spec and tickets and is built alongside these slices against made-up data, so slice 8
+only connects finished screens to real data. Its brief is `docs/ui/THEME.md`, which the interface's first ticket adds.
+
+### After that, one theme at a time
+
+| Theme | Built |
+|---|---|
+| **Safety and the red-team loop** | • Stolen-goods notices, `check_notices` and the constable<br>• A database role for the counter, and row-level security on customer history<br>• Leak checks<br>• Player sign-in (decision 10)<br>• Reranking, which `check_notices` needs ([§6](#6-the-agents)), measured on notice matching<br>• A leaderboard; every con that works becomes a frozen eval case |
+| **MCP, approvals, memory** | • `lombard-archive` over stdio, then public and read-only<br>• Owner approval for big loans, on a page and then through `lombard-owner`<br>• The day's report<br>• Memory of regular customers |
+| **The world moves** | • Event storming<br>• Kubernetes through `/pipeline:deploy`, replacing Fly.io; the workers run as a second Deployment<br>• The outbox relay to Kafka, and the game clock<br>• Redemptions and forfeits<br>• The notice matcher as a consumer, and a shadow matcher replaying past events<br>• Owner mode's season, with the game numbers tuned (decision 12) |
+| **Cost, quality, watching it run** | • Prompt caching, with the hit rate measured<br>• Effort `low` against `medium`<br>• Haiku against Sonnet on the shop eval (cost per correct decision)<br>• Reranking and contextualized embeddings on archive search, each measured against the hybrid baseline on the retrieval eval ([§7](#7-retrieval-and-embeddings)), with the winner recorded in an ADR<br>• An eval gate on a PR label<br>• OpenTelemetry, and a load test |
+| **Test users** | • A larger group of invited players<br>• A checklist for reviewing any AI system, drawn from the casebook |
+
+### Where the original phases went
+
+Other sections still name the phases P1 to P6. Read them through this table.
+
+| Phase | Now |
+|---|---|
+| P1 The archive | Slices 1, 2, 3 and 11. Two parts move: the archive MCP server to "MCP, approvals, memory", and the reranking and contextualized-embedding comparison to "Cost, quality, watching it run" |
+| P2 The pawnbroker talks | Slices 4, 5 and 8; the tool runner arrives in slice 8 |
+| P3 Customers and cons | Slices 6, 10 and 12, and "Safety and the red-team loop". The game numbers are tuned in "The world moves" |
+| P4 The world moves | "The world moves" |
+| P5 The owner | "MCP, approvals, memory", the day's report included |
+| P6 Cost, quality, production | Slice 9 for the deploy; the public archive server in "MCP, approvals, memory"; the rest in "Cost, quality, watching it run" |
 
 **Stretch goals, in any order:**
 
@@ -387,13 +460,15 @@ Each phase ends deployed to staging.
 | 1 | Name: `lombard`, after the Lombard moneylenders whose three-ball sign pawnbrokers still use | Decided |
 | 2 | Decade: the 1750s, which includes the calendar change | Decided; P1 confirms the trial count |
 | 3 | Kafka arrives in P4; the outbox table exists from P2 | Decided |
-| 4 | The tool loop on the Messages API first, then the tool runner | Decided |
+| 4 | The tool loop on the Messages API first (slice 4), then the tool runner (slice 8) | Decided |
 | 5 | Embeddings: Voyage AI through MongoDB Atlas | Decided |
 | 6 | Vector store: pgvector, in the one Postgres database | Decided |
 | 7 | Permissions live in database roles, RLS and tool scoping, never in the prompt | Decided |
 | 8 | The owner's MCP server uses a personal token; OAuth is a stretch ticket | Decided |
 | 9 | The repo is public; the data is never committed | Decided |
-| 10 | Player sign-in: magic link, passkeys or a hosted provider | P3, with an ADR |
-| 11 | Hosting: Kubernetes through GitHub Actions; the host is picked by a research ticket | S0 |
-| 12 | Game numbers: start at £10, 30 days, three strikes | Tuned in P3 |
+| 10 | Player sign-in: magic link, passkeys or a hosted provider | Invite codes for the first deployed version (decided 2026-11-13); sign-in soon after, with an ADR |
+| 11 | Hosting: Fly.io with Neon's Postgres for the first deploy; Kubernetes through GitHub Actions when the workers arrive, the cluster picked by a research ticket | Decided 2026-11-13 |
+| 12 | Game numbers: start at £10, 30 days, three strikes | The loan limits get starting values in slice 4; the season's numbers are tuned in "The world moves" |
 | 13 | MCP SDK: v2 (`@modelcontextprotocol/server`), with v1 as the fallback | Confirmed in P1 |
+| 14 | Build order: AI-first slices, the interface alongside, plumbing when a slice needs it ([§12](#12-build-order)) | Decided 2026-11-13 |
+| 15 | Starting sizes: 500 trials, 20 questions and 10 customers, then the full sizes | Decided 2026-11-13 |
