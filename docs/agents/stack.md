@@ -27,8 +27,8 @@ Run from the repo root on Node 24 (`nvm use`), with pnpm from Corepack. CI (`.gi
 | Purpose | Command |
 |---|---|
 | Compile or typecheck (fast) | `pnpm typecheck` |
-| One test file | `pnpm test src/config/config.test.ts` (any path or name filter) |
-| Full verify, including container tests | `pnpm verify` (typecheck, lint, format check, boundaries, Vitest, production build; container tests join Vitest in #5) |
+| One test file | `pnpm test src/config/config.test.ts` (any path or name filter; a `*.container.test.ts` file starts Postgres) |
+| Full verify, including container tests | `pnpm verify` (typecheck, lint, format check, boundaries, Vitest, production build). Needs Docker (OrbStack): Vitest's `container` project runs a throwaway `pgvector/pgvector` container (512 MB, 127.0.0.1) and removes it |
 | Lint and format check | `pnpm lint && pnpm format:check` (`pnpm format` rewrites files) |
 | Module-boundary check | `pnpm depcruise` |
 | End-to-end tests | not set up yet (Playwright, #9) |
