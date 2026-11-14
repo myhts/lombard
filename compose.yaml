@@ -9,8 +9,9 @@ services:
   postgres:
     # The same image test/postgres-container.ts runs for the container tests, so local and CI run one Postgres and one
     # pgvector.
-    # 0.8.6-pg18 is the newest exact tag older than 14 days (the release-age rule pnpm enforces for packages).
-    image: pgvector/pgvector:0.8.6-pg18
+    # 0.8.6-pg18 is the newest exact tag older than 14 days (the release-age rule pnpm enforces for packages). The
+    # digest is the multi-arch index (arm64 and amd64), so a re-pushed tag can't change what runs.
+    image: pgvector/pgvector:0.8.6-pg18@sha256:2ba9ca5f2e7daa0f0e7723cba1ee9167bab54efd3640516a44ac1a928dd67e7a
     environment:
       POSTGRES_USER: lombard
       POSTGRES_PASSWORD: lombard-dev # local-only, see above
