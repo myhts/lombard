@@ -5,7 +5,8 @@ import { getConfig } from "@/config";
 import { errorCodeSuffix } from "./error-code";
 import * as schema from "./schema";
 
-// Short limits, so a database that doesn't answer fails the health check in about 2 s instead of hanging it.
+// The app-wide budgets for now: every connect and query on the app's one pool gets 2 s, so a database that doesn't
+// answer fails the request instead of hanging it. A server-side statement_timeout is a follow-up.
 export const connectTimeoutMs = 2_000;
 const queryTimeoutMs = 2_000;
 
