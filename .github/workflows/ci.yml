@@ -1,6 +1,7 @@
 # .github/workflows/ci.yml: the checks a change must pass before it reaches main. Runs on every pull request and every
-# push to main: typecheck, ESLint, the Prettier check, dependency-cruiser's module-boundary rules, Vitest and a
-# production `next build`, each in its own step so a red run names what broke. `pnpm verify` runs the same locally.
+# push to main: typecheck, ESLint, the Prettier check, dependency-cruiser's module-boundary rules, Vitest (unit and
+# container tests) and a production `next build`, each in its own step so a red run names what broke. `pnpm verify`
+# runs the same locally.
 # Branch protection: require the check "verify".
 # No secrets and no API keys: config is checked only when the server starts, no step starts it, and the tests never
 # call a real model.
@@ -68,7 +69,9 @@ jobs:
       - name: Module boundaries (dependency-cruiser)
         run: pnpm depcruise
 
-      - name: Unit tests (Vitest)
+      # The container tests start their own throwaway Postgres with `docker run` (test/postgres-container.ts); the
+      # ubuntu-24.04 runner has Docker.
+      - name: Unit and container tests (Vitest)
         run: pnpm test
 
       # `next build` generates the route types and checks the app against them, and proves the bundle compiles.
