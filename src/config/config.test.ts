@@ -41,10 +41,12 @@ describe("loadConfig", () => {
     "postgresql://lombard@localhost/lombard",
     "postgres://u@127.0.0.1/db",
     "postgres://u@[::1]:5432/db",
+    "postgres://u@LOCALHOST/db",
     "postgres://u@localhost/db?sslmode=disable",
-    "postgres://u@db.example.com/db?sslmode=require",
-    "postgres://u@db.example.com/db?sslmode=verify-ca",
-    "postgres://u@db.example.com:5432/db?application_name=lombard&sslmode=verify-full",
+    "postgres://u@localhost/db?application_name=lombard&channel_binding=disable",
+    "postgres://u@db.example.com/db?sslmode=verify-full",
+    "postgres://u@db.example.com/db?sslmode=verify-full&sslmode=verify-full",
+    "postgres://u@db.example.com:5432/db?application_name=lombard&sslmode=verify-full&channel_binding=require",
   ])("accepts %s as DATABASE_URL", (url) => {
     const env = { ...validEnv(), DATABASE_URL: url };
 
@@ -101,17 +103,32 @@ describe("loadConfig", () => {
     ["DATABASE_URL", "postgresql:/x"],
     ["DATABASE_URL", "postgres://"],
     ["DATABASE_URL", "postgres:///db"],
-    // A host other than this machine must use TLS: node-postgres sends plain text unless sslmode asks for it.
+    // A host other than this machine must use TLS and check the server's certificate: sslmode=verify-full.
     ["DATABASE_URL", "postgres://u@db.example.com/db"],
-    ["DATABASE_URL", "postgres://u@db.example.com/db?ssl=true"],
+    ["DATABASE_URL", "postgres://u@DB.EXAMPLE.COM/db"],
     ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=disable"],
     ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=prefer"],
     ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=no-verify"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=require"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=verify-ca"],
     ["DATABASE_URL", "postgres://u@10.0.0.5/db"],
-    // node-postgres uses the last sslmode and lets ?host= replace the URL's host (also how a unix socket is named).
-    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=require&sslmode=disable"],
+    // node-postgres uses the last sslmode, so every one must be verify-full.
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=verify-full&sslmode=disable"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=verify-full&sslmode=require"],
+    // Only sslmode, application_name and channel_binding are allowed, on any host. uselibpqcompat turns certificate
+    // checks off under require; ?host= replaces the URL's host (and names a unix socket); the rest override TLS
+    // files, timeouts or TLS itself.
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=require&uselibpqcompat=true"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=verify-full&uselibpqcompat=true"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?ssl=true"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=verify-full&sslrootcert=/tmp/ca.pem"],
     ["DATABASE_URL", "postgres://u@localhost/db?host=db.example.com"],
     ["DATABASE_URL", "postgres://u@localhost/db?host=/var/run/postgresql"],
+    ["DATABASE_URL", "postgres://u@localhost/db?uselibpqcompat=true"],
+    ["DATABASE_URL", "postgres://u@localhost/db?sslcert=/tmp/client.pem"],
+    ["DATABASE_URL", "postgres://u@localhost/db?sslkey=/tmp/client.key"],
+    ["DATABASE_URL", "postgres://u@localhost/db?query_timeout=0"],
+    ["DATABASE_URL", "postgres://u@localhost/db?SSLMODE=disable"],
     ["ANTHROPIC_BASE_URL", "SENTINEL anthropic not a url"],
     ["ANTHROPIC_BASE_URL", "http://example.com"],
     ["ANTHROPIC_BASE_URL", "http://10.0.0.5:4010"],
@@ -135,6 +152,14 @@ describe("loadConfig", () => {
     ["another variable is missing", { DATABASE_URL: undefined }],
     ["the secret's own variable is malformed", { DATABASE_URL: "mysql://root:SENTINEL-db-password@db/x" }],
     ["a remote database URL has no sslmode", { DATABASE_URL: "postgres://u:SENTINEL-db-password@db.example.com/x" }],
+    [
+      "a remote database URL turns certificate checks off",
+      { DATABASE_URL: "postgres://u:SENTINEL-db-password@db.example.com/x?sslmode=require&uselibpqcompat=true" },
+    ],
+    [
+      "a database URL carries a parameter that isn't allowed",
+      { DATABASE_URL: "postgres://u@localhost/x?application_name=lombard&options=SENTINEL-option" },
+    ],
     ["a base URL is malformed", { ANTHROPIC_BASE_URL: "SENTINEL-anthropic-url" }],
     ["a base URL is plain http to a remote host", { VOYAGE_BASE_URL: "http://SENTINEL.example.com" }],
   ])("never includes a value in the error when %s", (_case, overrides: Env) => {
@@ -152,10 +177,18 @@ describe("loadConfig", () => {
     expect(exposed.join("\n")).not.toContain("SENTINEL");
   });
 
-  it("says a remote database needs sslmode", () => {
-    const env = { ...validEnv(), DATABASE_URL: "postgres://u@db.example.com/db" };
+  it("says a remote database needs sslmode=verify-full", () => {
+    const env = { ...validEnv(), DATABASE_URL: "postgres://u@db.example.com/db?sslmode=require" };
+    const message = configErrorFrom(env).message;
 
-    expect(configErrorFrom(env).message).toContain("sslmode=require, verify-ca or verify-full");
+    expect(message).toContain("sslmode=verify-full");
+    expect(message).not.toContain("require");
+  });
+
+  it("names the query parameters a database URL may carry", () => {
+    const env = { ...validEnv(), DATABASE_URL: "postgres://u@localhost/db?query_timeout=0" };
+
+    expect(configErrorFrom(env).message).toContain("sslmode, application_name and channel_binding");
   });
 
   it("names every problem in one error", () => {
