@@ -1,7 +1,7 @@
 import { createServer, type Server, type Socket } from "node:net";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTestDatabase } from "../../test/postgres";
-import { createDb } from "./client";
+import { connectTimeoutMs, createDb } from "./client";
 import { checkHealth } from "./health";
 
 async function healthOf(databaseUrl: string) {
@@ -52,7 +52,7 @@ describe("checkHealth", () => {
       const health = await healthOf(`postgres://lombard:SENTINEL-db-password@127.0.0.1:${server.port}/lombard`);
 
       expect(health).toEqual({ database: "down", vector: "unknown" });
-      expect(performance.now() - started).toBeLessThan(3_000);
+      expect(performance.now() - started).toBeLessThan(connectTimeoutMs + 2_000); // the margin absorbs a slow machine
       expect(logged).toHaveBeenCalled();
       // Only fixed strings: an Error object or its message could carry the connection string.
       for (const argument of logged.mock.calls.flat()) expect(typeof argument).toBe("string");

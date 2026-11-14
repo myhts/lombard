@@ -6,7 +6,7 @@ import { errorCodeSuffix } from "./error-code";
 import * as schema from "./schema";
 
 // Short limits, so a database that doesn't answer fails the health check in about 2 s instead of hanging it.
-const connectTimeoutMs = 2_000;
+export const connectTimeoutMs = 2_000;
 const queryTimeoutMs = 2_000;
 
 export function createDb(databaseUrl: string) {
