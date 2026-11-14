@@ -12,8 +12,9 @@ declare module "vitest" {
   }
 }
 
-// The compose file's image, so the tests and `pnpm dev` run the same Postgres and pgvector.
-const image = "pgvector/pgvector:0.8.6-pg18";
+// The compose file's image, so the tests and `pnpm dev` run the same Postgres and pgvector. Pinned to the multi-arch
+// index digest, so arm64 and amd64 (CI) run the same build and a re-pushed tag can't change it.
+const image = "pgvector/pgvector:0.8.6-pg18@sha256:2ba9ca5f2e7daa0f0e7723cba1ee9167bab54efd3640516a44ac1a928dd67e7a";
 const password = "lombard-test"; // a throwaway value for a container that lives for one run, on 127.0.0.1 only
 
 const execFileAsync = promisify(execFile);
