@@ -1,0 +1,12 @@
+Lombard
+Copyright 2026 Aseem Pareek
+
+Licensed under the Apache License, Version 2.0. See the LICENSE file.
+
+This licence covers what is in this repository: the code, the documents and the pictures.
+
+It does not cover the Old Bailey trial records that Lombard reads. They are not in this repository. They come from
+The Old Bailey Proceedings Online, 1674-1913 (version 7.2) and are licensed CC BY-NC 4.0, which allows
+non-commercial use only, with attribution: https://creativecommons.org/licenses/by-nc/4.0/
+
+Anyone who runs Lombard with those records must keep to that licence, whatever this one allows.
