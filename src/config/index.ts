@@ -26,16 +26,16 @@ const baseUrl = () =>
 
 // node-postgres reads these from the URL too, and most of them can undo the TLS rule below: uselibpqcompat turns
 // certificate checks off under sslmode=require, ?host= replaces the URL's host (it also names a unix socket), and
-// others swap the TLS files or the timeouts. So only parameters that can't are allowed, on any host
-// (#5, decision of 2026-11-14). pg 8.23.1 ignores channel_binding in the URL (only the client option
-// enableChannelBinding counts): it is allowed so Neon's connection string pastes unchanged, and isn't enforced.
+// others swap the TLS files or the timeouts. So only parameters that can't are allowed, on any host (ADR 0002).
+// pg 8.23.1 ignores channel_binding in the URL (only the client option enableChannelBinding counts): it is allowed
+// so Neon's connection string pastes unchanged, and isn't enforced.
 const allowedDatabaseParameters = new Set(["sslmode", "application_name", "channel_binding"]);
 
 // The rule must read the URL the way pg does. pg-connection-string's encodeURI rewrite: when the string holds a space
-// or a % not followed by two hex digits, pg runs encodeURI on all of it before parsing, which turns every other %XX
-// escape into a literal "%XX". URL decodes "ssl%6dode" to sslmode; after the rewrite pg finds a parameter named
-// "ssl%6dode", no sslmode, and connects in plain text. This is pg-connection-string 2.14.1's own test; refuse what it
-// matches.
+// or a % not followed by two hex digits, pg runs encodeURI on all of it before parsing, which leaves any %XX escape
+// with a hex letter, such as %6d, a literal "%6d". URL decodes "ssl%6dode" to sslmode; after the rewrite pg finds a
+// parameter named "ssl%6dode", no sslmode, and connects in plain text. This is pg-connection-string 2.14.1's own
+// test; refuse what it matches (ADR 0002).
 const pgRewritesUrl = / |%[^a-f0-9]|%[a-f0-9][^a-f0-9]/i;
 
 // A backstop in case pg's rewrite changes: a parameter name we allow never needs an escape, so refuse any that has one.
@@ -47,7 +47,8 @@ function hasEncodedParameterName(url: URL): boolean {
 }
 
 // node-postgres turns TLS off unless sslmode asks for it, and only verify-full checks the server's certificate and
-// name. It uses the last sslmode given, so every one must be verify-full. A postgres:// hostname keeps its case.
+// name. It uses the last sslmode given, so every one must be verify-full (ADR 0002).
+// A postgres:// hostname keeps its case.
 function isLocalOrVerifiesTls(value: string): boolean {
   if (pgRewritesUrl.test(value)) return false;
   const url = URL.parse(value);
