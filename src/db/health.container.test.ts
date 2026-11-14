@@ -61,4 +61,15 @@ describe("checkHealth", () => {
       await server.close();
     }
   });
+
+  it("reports the database down on a wrong password, logging the SQLSTATE but not the connection string", async () => {
+    const url = new URL(await createTestDatabase({ migrated: false }));
+    url.password = "SENTINEL-wrong-password";
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    expect(await healthOf(url.href)).toEqual({ database: "down", vector: "unknown" });
+    const text = logged.mock.calls.flat().join("\n");
+    expect(text).toContain("28P01"); // invalid_password
+    expect(text).not.toContain("SENTINEL");
+  });
 });
