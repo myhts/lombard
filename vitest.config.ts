@@ -28,7 +28,8 @@ export default defineConfig({
           name: "container",
           include: containerTests,
           globalSetup: ["test/postgres-container.ts"],
-          hookTimeout: 60_000, // creating and migrating a database
+          // The tests create and migrate their own database inside `it`, so the test timeout is the one that applies.
+          testTimeout: 30_000,
         },
       },
     ],
