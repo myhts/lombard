@@ -32,11 +32,15 @@ Run from the repo root on Node 24 (`nvm use`), with pnpm from Corepack. CI (`.gi
 | Lint and format check | `pnpm lint && pnpm format:check` (`pnpm format` rewrites files) |
 | Module-boundary check | `pnpm depcruise` |
 | End-to-end tests | not set up yet (Playwright, #9) |
-| Run locally | `pnpm dev`, then http://127.0.0.1:3000. It refuses to start until `.env` holds valid settings (`.env.example`) |
+| Run locally | `docker compose up -d --wait` (Postgres with pgvector, on OrbStack; returns once it is healthy), `pnpm db:migrate`, then `pnpm dev` and http://127.0.0.1:3000. The app refuses to start until `.env` holds valid settings (`.env.example`). `docker compose down` stops the database and keeps its data |
 
 ## Migrations
 
-- **Tool:** Drizzle (drizzle-kit), planned; none yet.
+- **Tool:** Drizzle (drizzle-kit). The schema is `src/db/schema.ts`; migrations live in `drizzle/`.
+- **Commands:** `pnpm db:generate --name <what>` writes the next migration from the schema; `pnpm db:migrate` applies
+  every pending one to `DATABASE_URL` (read from the shell, else from `.env`). Nothing runs migrations at app start.
+- **Hand edits:** a generated SQL file may be edited only before it is ever applied (`0000` starts with
+  `CREATE EXTENSION IF NOT EXISTS vector`); the snapshots in `drizzle/meta/` are never edited.
 - **Rule:** never edit an applied migration. Change schemas expand → migrate → contract, so the previous version still
   runs against the new schema and a rollback stays safe.
 
