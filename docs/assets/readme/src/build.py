@@ -143,14 +143,12 @@ def lombard_banner(name, w, h, scale, big):
   <p class="fell it" style="font-size:{tag}px;margin-top:10px">Pawnbroker, at the sign of the Three Balls</p>
   <p class="sc" style="font-size:{26 if big else 19}px;margin-top:8px;letter-spacing:.1em">London, 1753</p>
 </div>
-<div class="abs paper" style="right:{70 if big else 44}px;top:{330 if big else 92}px;width:{slip_w}px;padding:{22 if big else 16}px {26 if big else 18}px;transform:rotate(2.2deg);box-shadow:inset 0 0 30px rgba(150,120,70,.4),0 12px 26px rgba(0,0,0,.6);font-size:{21 if big else 16}px;line-height:1.42">
+<div class="abs paper" style="right:{70 if big else 44}px;top:{300 if big else 92}px;width:{slip_w}px;padding:{22 if big else 16}px {26 if big else 18}px;transform:rotate(2.2deg);box-shadow:inset 0 0 30px rgba(150,120,70,.4),0 12px 26px rgba(0,0,0,.6);font-size:{21 if big else 16}px;line-height:1.42">
   <p class="sc" style="font-size:{19 if big else 14.5}px;text-align:center;color:#8c1c13">Take Notice</p>
   <p style="margin-top:6px">Every price he quotes rests on a trial at the Old Bailey.</p>
   <p style="margin-top:10px;padding-top:9px;border-top:3px double #cdbb94">The pawnbroker is an AI. The trials it cites are real.</p>
 </div>
 """
-    if big:
-        body = body.replace("top:330px", "top:300px")
     page(name, w, h, body, scale)
 
 
@@ -183,7 +181,7 @@ STAGES = [
             (2, "Search you can measure", "Keyword, vector and hybrid search: recall@5 and recall@10."),
             (3, "Extraction", "Items and their values in pence, checked against hand labels."),
             (4, "The pawnbroker talks", "A tool loop with lending limits in code. Limit breaches: must be 0."),
-            (5, "Grounded answers", "Every price cites a trial, or he says there is no record."),
+            (5, "Grounded answers", "Every price cites a trial, or it says there is no record."),
             (6, "Customers and cons", "AI customers with secret truth cards, and the first shop eval."),
             (7, "Explain it", "The first casebook entries: what failed, the fix, the numbers."),
         ],
