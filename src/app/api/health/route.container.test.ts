@@ -21,7 +21,10 @@ async function requestHealth(databaseUrl: string) {
 }
 
 describe("GET /api/health", () => {
-  afterEach(() => vi.unstubAllEnvs());
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
 
   it("answers 200 when the database is up and the vector extension is present", async () => {
     const response = await requestHealth(await createTestDatabase({ migrated: true }));
@@ -33,5 +36,13 @@ describe("GET /api/health", () => {
     const response = await requestHealth(await createTestDatabase({ migrated: false }));
 
     expect(response).toEqual({ status: 503, body: { status: "unavailable", database: "up", vector: "missing" } });
+  });
+
+  it("answers 503 when the database is down", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined); // the health check logs the failure
+    // Nothing listens on port 1, so the connection is refused at once.
+    const response = await requestHealth("postgres://lombard:not-a-password@127.0.0.1:1/lombard");
+
+    expect(response).toEqual({ status: 503, body: { status: "unavailable", database: "down", vector: "unknown" } });
   });
 });
