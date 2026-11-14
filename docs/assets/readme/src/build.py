@@ -454,5 +454,25 @@ shop = f"""
 """
 page("plan-of-the-shop", SW, SH, shop, 1.5)
 
+# A page that asks the browser whether every font the pictures use has arrived, and writes the answer where render.sh
+# can read it. With no network and nothing cached, Chrome draws in fallback type without any error of its own.
+NEEDED = [
+    '16px "IM Fell English"',
+    'italic 16px "IM Fell English"',
+    '16px "IM Fell English SC"',
+    '16px "Libre Caslon Text"',
+    'italic 16px "Libre Caslon Text"',
+    'bold 16px "Libre Caslon Text"',
+]
+(BUILD / "fonts-check.html").write_text(
+    f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title>fonts-check</title>{FONTS}</head><body><script>'
+    f"const needed = {NEEDED!r};"
+    "Promise.all(needed.map(f => document.fonts.load(f).then(faces => faces.length > 0, () => false)))"
+    ".then(got => { const missing = needed.filter((f, i) => !got[i]);"
+    'document.documentElement.dataset.fonts = missing.length ? "missing " + missing.length + " of " + needed.length : "ok"; });'
+    "</script></body></html>",
+    encoding="utf-8",
+)
+
 (BUILD / "sizes.tsv").write_text("".join(f"{n}\t{w}\t{h}\t{s}\t{q}\n" for n, w, h, s, q in PAGES), encoding="utf-8")
 print(f"wrote {len(PAGES)} pages to {BUILD}")
