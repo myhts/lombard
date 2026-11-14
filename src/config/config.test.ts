@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ConfigError, loadConfig, loadDatabaseConfig } from "./index";
 
@@ -36,7 +37,7 @@ describe("loadConfig", () => {
     expect(Object.isFrozen(config.voyage)).toBe(true);
   });
 
-  it.each([
+  const acceptedLocalDatabaseUrls = [
     "postgres://lombard:pw@localhost:5432/lombard",
     "postgresql://lombard@localhost/lombard",
     "postgres://u@127.0.0.1/db",
@@ -44,13 +45,43 @@ describe("loadConfig", () => {
     "postgres://u@LOCALHOST/db",
     "postgres://u@localhost/db?sslmode=disable",
     "postgres://u@localhost/db?application_name=lombard&channel_binding=disable",
+  ];
+  const acceptedRemoteDatabaseUrls = [
     "postgres://u@db.example.com/db?sslmode=verify-full",
     "postgres://u@db.example.com/db?sslmode=verify-full&sslmode=verify-full",
     "postgres://u@db.example.com:5432/db?application_name=lombard&sslmode=verify-full&channel_binding=require",
-  ])("accepts %s as DATABASE_URL", (url) => {
+    "postgres://u:p%20w@db.example.com/db?sslmode=verify-full&application_name=a%20b",
+  ];
+  it.each([...acceptedLocalDatabaseUrls, ...acceptedRemoteDatabaseUrls])("accepts %s as DATABASE_URL", (url) => {
     const env = { ...validEnv(), DATABASE_URL: url };
 
     expect(loadConfig(env).databaseUrl).toBe(url);
+  });
+
+  // The rule is only as good as its agreement with the driver, so ask the driver itself: pg's own connection-string
+  // parser, reached through pg (it isn't our dependency), must read every remote URL we accept as TLS that checks the
+  // server's certificate.
+  const pgRequire = createRequire(createRequire(import.meta.url).resolve("pg"));
+  // A CommonJS require returns any; the test reads only `ssl` from the result.
+  const { parse: parseLikePg } = pgRequire("pg-connection-string") as { parse: (url: string) => { ssl?: unknown } };
+
+  it.each(acceptedRemoteDatabaseUrls)("pg reads accepted %s as TLS with certificate checks", (url) => {
+    const { ssl } = parseLikePg(url);
+
+    expect(ssl).toBeTruthy();
+    expect(ssl).not.toMatchObject({ rejectUnauthorized: false });
+  });
+
+  // Each looks like sslmode=verify-full to the WHATWG URL parser, but a space or a malformed % makes pg rewrite the
+  // string with encodeURI first, so pg finds a parameter named "ssl%6dode", no sslmode, and connects in plain text.
+  const parserDifferentialUrls = [
+    "postgres://u:pw@db.example.com/db?ssl%6dode=verify-full&application_name=a b",
+    "postgres://u:pw@db.example.com/db?ssl%6dode=verify-full&application_name=x%zz",
+    "postgres://u:p w@db.example.com/db?ssl%6dode=verify-full",
+  ];
+
+  it.each(parserDifferentialUrls)("pg reads %s without TLS, so the rule must refuse it", (url) => {
+    expect(parseLikePg(url).ssl).toBeUndefined();
   });
 
   const baseUrlNames = ["ANTHROPIC_BASE_URL", "VOYAGE_BASE_URL"];
@@ -129,6 +160,13 @@ describe("loadConfig", () => {
     ["DATABASE_URL", "postgres://u@localhost/db?sslkey=/tmp/client.key"],
     ["DATABASE_URL", "postgres://u@localhost/db?query_timeout=0"],
     ["DATABASE_URL", "postgres://u@localhost/db?SSLMODE=disable"],
+    // URLs pg would rewrite with encodeURI before reading them (see parserDifferentialUrls), and, as a backstop, any
+    // percent-encoded parameter name, even where pg would decode it the same way.
+    ...parserDifferentialUrls.map((url) => ["DATABASE_URL", url]),
+    ["DATABASE_URL", "postgres://u@db.example.com/db?sslmode=verify-full&application_name=a%2g"],
+    ["DATABASE_URL", "postgres://u@localhost/db?sslmode=disable&application_name=a b"],
+    ["DATABASE_URL", "postgres://u@db.example.com/db?ssl%6dode=verify-full"],
+    ["DATABASE_URL", "postgres://u@localhost/db?%61pplication_name=lombard"],
     ["ANTHROPIC_BASE_URL", "SENTINEL anthropic not a url"],
     ["ANTHROPIC_BASE_URL", "http://example.com"],
     ["ANTHROPIC_BASE_URL", "http://10.0.0.5:4010"],
@@ -160,6 +198,10 @@ describe("loadConfig", () => {
       "a database URL carries a parameter that isn't allowed",
       { DATABASE_URL: "postgres://u@localhost/x?application_name=lombard&options=SENTINEL-option" },
     ],
+    [
+      "a database URL is one pg would rewrite",
+      { DATABASE_URL: "postgres://u:SENTINEL db-password@db.example.com/x?ssl%6dode=verify-full" },
+    ],
     ["a base URL is malformed", { ANTHROPIC_BASE_URL: "SENTINEL-anthropic-url" }],
     ["a base URL is plain http to a remote host", { VOYAGE_BASE_URL: "http://SENTINEL.example.com" }],
   ])("never includes a value in the error when %s", (_case, overrides: Env) => {
@@ -189,6 +231,12 @@ describe("loadConfig", () => {
     const env = { ...validEnv(), DATABASE_URL: "postgres://u@localhost/db?query_timeout=0" };
 
     expect(configErrorFrom(env).message).toContain("sslmode, application_name and channel_binding");
+  });
+
+  it("says a database URL needs its spaces and stray % percent-encoded", () => {
+    const env = { ...validEnv(), DATABASE_URL: "postgres://u@localhost/db?application_name=a b" };
+
+    expect(configErrorFrom(env).message).toContain("every space and stray % percent-encoded");
   });
 
   it("names every problem in one error", () => {
