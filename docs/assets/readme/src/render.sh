@@ -27,6 +27,21 @@ shoot() { # page name, width, height, scale, output file
   return 1
 }
 
+# The pictures depend on web fonts. With no network and nothing cached, Chrome draws in fallback type, and two
+# screenshots of that still agree. So first ask a page whether every font arrived, and stop if any did not.
+fonts=""
+for _try in 1 2 3; do
+  fonts="$("$chrome" --headless=new --disable-gpu --no-first-run --no-default-browser-check \
+    --user-data-dir="$dir/build/chrome-profile" --virtual-time-budget=6000 \
+    --dump-dom "file://$dir/build/fonts-check.html" </dev/null 2>/dev/null |
+    grep -o 'data-fonts="[^"]*"' | head -1 || true)"
+  if [ -n "$fonts" ]; then break; fi
+done
+if [ "$fonts" != 'data-fonts="ok"' ]; then
+  echo "The fonts did not load (${fonts:-Chrome gave no answer}). Is there a network connection? Nothing was written." >&2
+  exit 1
+fi
+
 while IFS=$'\t' read -r name w h scale quality; do
   if [ -n "$only" ] && [ "$only" != "$name" ]; then continue; fi
   png="$dir/build/$name.png"
