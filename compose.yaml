@@ -1,12 +1,14 @@
-# compose.yaml: the local Postgres for `pnpm dev` and `pnpm db:migrate`. Start it with `docker compose up -d`
-# (OrbStack), stop it with `docker compose down`; the data stays in the named volume until `down -v`.
+# compose.yaml: the local Postgres for `pnpm dev` and `pnpm db:migrate`. Start it with `docker compose up -d --wait`
+# (OrbStack), which returns once the healthcheck passes, so a migrate right after doesn't race the first start. Stop it
+# with `docker compose down`; the data stays in the named volume until `down -v`.
 # Local only: the password below is a throwaway dev value, not a secret, and the port is bound to 127.0.0.1 so nothing
 # off this machine can reach it. `.env.example` holds the matching DATABASE_URL.
 name: lombard
 
 services:
   postgres:
-    # The same image the Testcontainers tests use, so local and CI run one Postgres and one pgvector.
+    # The same image test/postgres-container.ts runs for the container tests, so local and CI run one Postgres and one
+    # pgvector.
     # 0.8.6-pg18 is the newest exact tag older than 14 days (the release-age rule pnpm enforces for packages).
     image: pgvector/pgvector:0.8.6-pg18
     environment:
@@ -26,6 +28,9 @@ services:
       interval: 2s
       timeout: 3s
       retries: 15
+      # The first start initialises the data directory; failures in that window don't count, and it checks every second.
+      start_period: 30s
+      start_interval: 1s
 
 volumes:
   pgdata:
