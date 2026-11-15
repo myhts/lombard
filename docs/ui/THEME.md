@@ -59,7 +59,7 @@ lines are also cheap to build well in CSS, need almost no images and stay readab
 | `--color-brass` | `#b8892b` | The three balls, coins, rules on dark wood. Decoration only, never text on paper | — |
 | `--color-oak` | `#3b2a1c` | The counter's edge, panels | — |
 | `--color-night` | `#1a1410` | The page background around the counter | — |
-| `--color-candle` | `#f6c56b` | The candle's glow, text on night | on night |
+| `--color-candle` | `#f6c56b` | The candle's glow, text on night and on baize | on night, on baize |
 | `--color-glass` | `#10151a` | The instrument layer's background | — |
 | `--color-readout` | `#d7e0e6` | The instrument layer's text | on glass |
 | `--color-signal` | `#7fd1c4` | The instrument layer's highlights | on glass |

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { contrastRatio } from "./contrast";
 import { readThemeTokens } from "./theme-tokens";
 
-// The ten pairs in the last column of the brief's colour table (docs/ui/THEME.md): text colour, then its ground.
+// Every pair in the last column of the brief's colour table (docs/ui/THEME.md): text colour, then its ground.
 const textPairs = [
   ["--color-ink", "--color-paper"],
   ["--color-ink", "--color-paper-aged"],
@@ -12,6 +12,7 @@ const textPairs = [
   ["--color-prussian", "--color-paper"],
   ["--color-baize", "--color-paper"],
   ["--color-candle", "--color-night"],
+  ["--color-candle", "--color-baize"],
   ["--color-readout", "--color-glass"],
   ["--color-signal", "--color-glass"],
 ] as const;
