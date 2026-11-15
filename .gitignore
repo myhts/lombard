@@ -14,8 +14,14 @@
 # Node and build output
 node_modules/
 .next/
+.next-ui/
 dist/
 coverage/
 *.tsbuildinfo
 .DS_Store
 next-env.d.ts
+
+# The interface's pictures (`pnpm ui:shots`) and Playwright's own output folders
+.ui-shots/
+test-results/
+playwright-report/

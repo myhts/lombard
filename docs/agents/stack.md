@@ -5,10 +5,10 @@ wrote it; edit it by hand whenever the project changes.
 
 ## Pack
 
-- **Pack:** none. The stack is TypeScript: Next.js, Postgres 18 with pgvector, Drizzle, Vitest and pnpm (see the
-  plan, section 11). With `none`, every stage and agent works the same; what's missing is stack knowledge. The
-  standards review uses `CODING_STANDARDS.md` and the smell baseline, and `/deploy` writes its files from the shape
-  in its "No pack" list.
+- **Pack:** none. The stack is TypeScript: Next.js, Tailwind 4, Postgres 18 with pgvector, Drizzle, Vitest and pnpm
+  (see the plan, section 11). With `none`, every stage and agent works the same; what's missing is stack knowledge.
+  The standards review uses `CODING_STANDARDS.md` and the smell baseline, and `/deploy` writes its files from the
+  shape in its "No pack" list.
 - **Next.js docs:** Next 16 postdates most training data. Before writing Next.js code, read the guide for the installed
   version in `node_modules/next/dist/docs/`.
 - **Release age:** `pnpm-workspace.yaml` sets `minimumReleaseAge: 20160` (14 days), so pnpm refuses any younger
@@ -32,8 +32,21 @@ Run from the repo root on Node 24 (`nvm use`), with pnpm from Corepack. CI (`.gi
 | Clean up after a killed test run | A run that is killed (Ctrl-C twice, a crash) can leave its `lombard-test-…` container behind. With no test run going, list them with `docker ps -a --filter label=lombard.test=true`, then remove them and their data volumes with `docker rm -f --volumes $(docker ps -aq --filter label=lombard.test=true)`. A manual step: test setup never removes another run's containers |
 | Lint and format check | `pnpm lint && pnpm format:check` (`pnpm format` rewrites files) |
 | Module-boundary check | `pnpm depcruise` |
-| End-to-end tests | not set up yet (Playwright, #9) |
+| End-to-end tests | not set up yet (Playwright, #9). Playwright is already installed for `pnpm ui:shots` (see Interface), so #9 reuses that set-up and widens `testMatch` in `playwright.config.ts` instead of installing it again |
 | Run locally | `docker compose up -d --wait` (Postgres with pgvector, on OrbStack; returns once it is healthy), `pnpm db:migrate`, then `pnpm dev` and http://127.0.0.1:3000. The app refuses to start until `.env` holds valid settings (`.env.example`). `docker compose down` stops the database and keeps its data |
+
+## Interface
+
+The interface (spec #12) is built on made-up data and judged by looking. Both commands run on this machine only:
+`pnpm verify` and CI never start Playwright, and CI installs no browser.
+
+| Purpose | Command |
+|---|---|
+| Look at the interface | `pnpm ui:dev`, then http://127.0.0.1:3001/specimen. Needs no `.env` and no key: the script passes placeholder settings as environment variables, which win over any `.env`, and its `DATABASE_URL` points at nothing live. It builds into `.next-ui/`, so it runs beside `pnpm dev` |
+| Save the pictures | `pnpm ui:shots` saves the whole page and each specimen section, at 360px and 1280px, into `.ui-shots/` (git-ignored). It starts `pnpm ui:dev` itself, or uses the one already running. Chromium only, installed once with `pnpm exec playwright install chromium` |
+
+Every colour, face, size and timing is a token in `src/ui/theme.css`, and every string is in `src/ui/copy.ts`
+(`docs/ui/THEME.md`, rules 3 and 6).
 
 ## Migrations
 

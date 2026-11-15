@@ -59,7 +59,7 @@ lines are also cheap to build well in CSS, need almost no images and stay readab
 | `--color-brass` | `#b8892b` | The three balls, coins, rules on dark wood. Decoration only, never text on paper | — |
 | `--color-oak` | `#3b2a1c` | The counter's edge, panels | — |
 | `--color-night` | `#1a1410` | The page background around the counter | — |
-| `--color-candle` | `#f6c56b` | The candle's glow, text on night | on night |
+| `--color-candle` | `#f6c56b` | The candle's glow, text on night and on baize | on night, on baize |
 | `--color-glass` | `#10151a` | The instrument layer's background | — |
 | `--color-readout` | `#d7e0e6` | The instrument layer's text | on glass |
 | `--color-signal` | `#7fd1c4` | The instrument layer's highlights | on glass |
@@ -69,17 +69,20 @@ lines are also cheap to build well in CSS, need almost no images and stay readab
 | Token | Face | Why this face | Used for |
 |---|---|---|---|
 | `--font-text` | Libre Caslon Text | William Caslon's types were the standard English book face of the 1750s | All running text, the dialogue, clippings |
-| `--font-display` | IM Fell English, with IM Fell English SC for small capitals | A digitised set of old English printing types with the rough edges of hand-set print | Mastheads, document headings, the shop sign |
+| `--font-display` | IM Fell English | A digitised set of old English printing types with the rough edges of hand-set print | Mastheads, document headings, the shop sign |
+| `--font-display-sc` | IM Fell English SC | The same types' small capitals, which Google Fonts serves as a family of its own | Speakers' names in the dialogue, headings set in small capitals |
 | `--font-hand` | Pinyon Script | An English round hand, the business handwriting of the century | The pawn ticket's number, signatures. Never more than a few words |
 | `--font-instrument` | The system monospace stack | Free, instant and plainly modern | The whole instrument layer |
 
 Each family loads at build time with only the Latin subset and the weights used. If one isn't available that way, the
 implementer picks the nearest from the same tradition and records it in the brief.
 
-**Other tokens:** a type scale of six sizes from 14px to 40px; spacing in steps of 4px; `--radius-paper: 1px` (paper has
-square corners); three shadows (a sheet lying on wood, a sheet lifted, a seal's emboss); durations `--quick: 150ms`,
-`--settle: 300ms`, `--stamp: 250ms`, `--slow: 600ms`, `--beat: 80ms` (the gap between things that land one after
-another, such as the coins).
+**Other tokens:** a type scale of six sizes, written in rem: `--text-sm` (14px), `--text-base` (17px, body text),
+`--text-lg` (20px), `--text-xl` (24px), `--text-2xl` (32px) and `--text-3xl` (40px), the three largest with their own
+line heights (1.3, 1.2 and 1.15); spacing in steps of 4px (`--spacing`); `--radius-paper: 1px` (paper has square
+corners); three shadows: `--shadow-resting` (a sheet lying on wood), `--shadow-lifted` (a sheet lifted) and
+`--shadow-emboss` (a seal's emboss); durations `--quick: 150ms`, `--settle: 300ms`, `--stamp: 250ms`, `--slow: 600ms`,
+`--beat: 80ms` (the gap between things that land one after another, such as the coins).
 
 **Texture and light:**
 
