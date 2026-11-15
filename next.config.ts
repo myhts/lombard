@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   agentRules: false,
   // `next dev` allows one server per build folder: it holds a lock in <distDir>/dev/lock. The interface's server gets
   // its own folder, so it can run beside `pnpm dev`.
-  distDir: uiDistDir ?? ".next",
+  distDir: uiDistDir || ".next",
   // Next's round dev badge would sit on top of the page in the pictures `pnpm ui:shots` saves. Errors still show.
   devIndicators: uiDistDir ? false : undefined,
 };
