@@ -14,7 +14,7 @@ A printed notice of stolen goods, as shown on screen.
 The page that shows every piece in every state with made-up data.
 
 **Plain mode**:
-The setting that removes the candle, the vignette and every animation.
+The setting that removes the candle, the vignette and every animation. Its switch is labelled "Snuff the candle".
 
 **Behind the counter**:
 The instrument layer's panel, showing what the AI saw and did.

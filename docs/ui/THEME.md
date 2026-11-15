@@ -13,13 +13,14 @@ saw and did ([ADR 0003](../adr/0003-interface-two-layers-css-only.md)).
 1. **CSS only for effects.** No canvas, no WebGL and no animation library. Textures come from CSS gradients and inline
    SVG filters, not image files. The interface is silent in every ticket of spec #12; sound is parked, not ruled out
    (#15).
-2. **Two new dependencies, no more:** Tailwind 4 at runtime (plan §11) and Playwright as a dev dependency, used only by
-   the screenshot command until slice 9 adds its smoke test. Both pinned, and at least 14 days old as
-   `minimumReleaseAge` requires.
+2. **Three new dependencies, no more,** all dev dependencies: `tailwindcss` and `@tailwindcss/postcss` (Tailwind 4, plan
+   §11), and Playwright, used only by the screenshot command until slice 9 adds its smoke test. All three pinned, and at
+   least 14 days old as `minimumReleaseAge` requires.
 3. **All colours, sizes and timings are tokens** in one stylesheet. A component never holds a raw hex value or a raw
    duration.
-4. **The `ui` module is domain-free,** like `engine`. It imports only React, itself and npm packages. It takes plain
-   props (strings, pence as integers, dates) and never fetches.
+4. **The `ui` module is domain-free,** like `engine`. It imports only itself, declared npm packages (React among them)
+   and Node built-ins, as the boundary rule `ui-imports-no-domain` allows. It takes plain props (strings, pence as
+   integers, dates) and never fetches.
 5. **Server components by default.** Only four things are client components: the dialogue composer and stream, the
    plain-mode switch, the Behind-the-counter switch, and the candle (`CODING_STANDARDS.md`, "Server and client stay
    apart").
@@ -77,7 +78,8 @@ implementer picks the nearest from the same tradition and records it in the brie
 
 **Other tokens:** a type scale of six sizes from 14px to 40px; spacing in steps of 4px; `--radius-paper: 1px` (paper has
 square corners); three shadows (a sheet lying on wood, a sheet lifted, a seal's emboss); durations `--quick: 150ms`,
-`--settle: 300ms`, `--stamp: 250ms`, `--slow: 600ms`.
+`--settle: 300ms`, `--stamp: 250ms`, `--slow: 600ms`, `--beat: 80ms` (the gap between things that land one after
+another, such as the coins).
 
 **Texture and light:**
 
@@ -89,8 +91,10 @@ square corners); three shadows (a sheet lying on wood, a sheet lifted, a seal's 
 | Oak and baize | Layered gradients for grain and cloth | The page background and the counter | Never |
 | Candlelight | One fixed overlay: a warm radial gradient whose opacity and position drift on a slow, irregular keyframe loop, with a dark vignette at the edges | The period layer's page | Reduced motion, plain mode, and whenever the instrument panel is open over it |
 | Ink caret | A small nib-shaped mark at the end of the text while it streams | The pawnbroker's current line | When the stream ends |
+| Waiting pulse | One shared keyframe loop that fades a small ink mark to faint and back, `--slow` each way; the words beside it never fade | Beside the current stage direction while its tool runs; beside the composer's button while it is sending | Reduced motion and plain mode |
 
-Only the candle and one waiting pulse ever loop. Everything else plays once.
+Only the candle and one waiting pulse ever loop. Everything else plays once. The waiting pulse is one shared animation:
+it shows on the current stage direction while its tool runs, and on the composer while it is sending.
 
 **Plain mode,** labelled "Snuff the candle": one switch that removes the candle, the vignette and every animation, and
 sets the page to flat paper on a flat dark background. It is remembered in the browser. It is the accessibility fallback
