@@ -35,6 +35,19 @@ Run from the repo root on Node 24 (`nvm use`), with pnpm from Corepack. CI (`.gi
 | End-to-end tests | not set up yet (Playwright, #9) |
 | Run locally | `docker compose up -d --wait` (Postgres with pgvector, on OrbStack; returns once it is healthy), `pnpm db:migrate`, then `pnpm dev` and http://127.0.0.1:3000. The app refuses to start until `.env` holds valid settings (`.env.example`). `docker compose down` stops the database and keeps its data |
 
+## Interface
+
+The interface (spec #12) is built on made-up data and judged by looking. Both commands run on this machine only:
+`pnpm verify` and CI never start Playwright, and CI installs no browser.
+
+| Purpose | Command |
+|---|---|
+| Look at the interface | `pnpm ui:dev`, then http://127.0.0.1:3001/specimen. Needs no `.env` and no key: the script passes placeholder settings as environment variables, which win over any `.env`, and its `DATABASE_URL` points at nothing live. It builds into `.next-ui/`, so it runs beside `pnpm dev` |
+| Save the pictures | `pnpm ui:shots` saves the whole page and each specimen section, at 360px and 1280px, into `.ui-shots/` (git-ignored). It starts `pnpm ui:dev` itself, or uses the one already running. Chromium only, installed once with `pnpm exec playwright install chromium` |
+
+Every colour, face, size and timing is a token in `src/ui/theme.css`, and every string is in `src/ui/copy.ts`
+(`docs/ui/THEME.md`, rules 3 and 6).
+
 ## Migrations
 
 - **Tool:** Drizzle (drizzle-kit). The schema is `src/db/schema.ts`; migrations live in `drizzle/`.

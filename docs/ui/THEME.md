@@ -69,7 +69,8 @@ lines are also cheap to build well in CSS, need almost no images and stay readab
 | Token | Face | Why this face | Used for |
 |---|---|---|---|
 | `--font-text` | Libre Caslon Text | William Caslon's types were the standard English book face of the 1750s | All running text, the dialogue, clippings |
-| `--font-display` | IM Fell English, with IM Fell English SC for small capitals | A digitised set of old English printing types with the rough edges of hand-set print | Mastheads, document headings, the shop sign |
+| `--font-display` | IM Fell English | A digitised set of old English printing types with the rough edges of hand-set print | Mastheads, document headings, the shop sign |
+| `--font-display-sc` | IM Fell English SC | The same types' small capitals, which Google Fonts serves as a family of its own | Speakers' names in the dialogue, headings set in small capitals |
 | `--font-hand` | Pinyon Script | An English round hand, the business handwriting of the century | The pawn ticket's number, signatures. Never more than a few words |
 | `--font-instrument` | The system monospace stack | Free, instant and plainly modern | The whole instrument layer |
 
