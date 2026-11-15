@@ -1,5 +1,5 @@
 // Module-boundary rules, checked by `pnpm depcruise`. Hand-written and kept small on purpose: each rule here is a
-// decision from ticket #4, so add a rule only with a decision behind it.
+// decision from a ticket (#4, unless the rule's comment names another), so add a rule only with a decision behind it.
 
 /** @type {import("dependency-cruiser").IConfiguration} */
 const config = {
@@ -36,6 +36,20 @@ const config = {
         "import helpers, so only non-test files under src/ are checked.",
       from: { path: "^src/", pathNot: "\\.test\\.tsx?$" },
       to: { path: ["^test/", "\\.test\\.tsx?$"] },
+    },
+    {
+      name: "ui-imports-no-domain",
+      severity: "error",
+      comment:
+        "The interface is domain-free, like the engine (ticket #16; docs/ui/THEME.md, rule 4): files under src/ui/ " +
+        "may import only src/ui/, npm packages and built-ins. The same allowlist as engine-imports-no-domain, so it " +
+        "also catches domain modules that don't exist yet.",
+      from: { path: "^src/ui/" },
+      // Read like the engine's rule above: forbid anything outside src/ui/ that isn't a declared package or a built-in.
+      to: {
+        pathNot: "^src/ui/",
+        dependencyTypesNot: ["npm", "npm-dev", "npm-optional", "npm-peer", "npm-bundled", "core"],
+      },
     },
   ],
   options: {
