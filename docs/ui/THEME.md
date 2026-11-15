@@ -77,10 +77,12 @@ lines are also cheap to build well in CSS, need almost no images and stay readab
 Each family loads at build time with only the Latin subset and the weights used. If one isn't available that way, the
 implementer picks the nearest from the same tradition and records it in the brief.
 
-**Other tokens:** a type scale of six sizes from 14px to 40px; spacing in steps of 4px; `--radius-paper: 1px` (paper has
-square corners); three shadows (a sheet lying on wood, a sheet lifted, a seal's emboss); durations `--quick: 150ms`,
-`--settle: 300ms`, `--stamp: 250ms`, `--slow: 600ms`, `--beat: 80ms` (the gap between things that land one after
-another, such as the coins).
+**Other tokens:** a type scale of six sizes, written in rem: `--text-sm` (14px), `--text-base` (17px, body text),
+`--text-lg` (20px), `--text-xl` (24px), `--text-2xl` (32px) and `--text-3xl` (40px), the three largest with their own
+line heights (1.3, 1.2 and 1.15); spacing in steps of 4px (`--spacing`); `--radius-paper: 1px` (paper has square
+corners); three shadows: `--shadow-resting` (a sheet lying on wood), `--shadow-lifted` (a sheet lifted) and
+`--shadow-emboss` (a seal's emboss); durations `--quick: 150ms`, `--settle: 300ms`, `--stamp: 250ms`, `--slow: 600ms`,
+`--beat: 80ms` (the gap between things that land one after another, such as the coins).
 
 **Texture and light:**
 
