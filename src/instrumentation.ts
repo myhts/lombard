@@ -9,13 +9,13 @@ export async function register() {
     try {
       // Imported here, as the Next docs advise, so the Edge bundle never pulls in the config module. Inside the `try`
       // so a module that fails to load also stops the server.
-      const { loadConfig } = await import("./config");
-      loadConfig(process.env);
+      const { getConfig } = await import("./config");
+      getConfig();
     } catch (error) {
       // Exit ourselves on any error instead of rethrowing. Tried on Next 16.4.2: when register() throws, `next dev`
       // exits with code 1, but `next start` logs the error and keeps running, answering every request with HTTP 500,
       // so a container would look alive. Exiting gives both commands the same clear failure. Logging the error whole
-      // is safe: loadConfig throws only a ConfigError, which holds variable names and reasons, never values, and an
+      // is safe: getConfig throws only a ConfigError, which holds variable names and reasons, never values, and an
       // import error comes from our own code, not the environment.
       console.error(error);
       process.exit(1);
