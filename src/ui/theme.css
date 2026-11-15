@@ -1,0 +1,108 @@
+/* The theme: every colour, face, size and timing in the interface is a token here, and raw values appear nowhere else
+   (docs/ui/THEME.md, rule 3). The specimen sheet and the contrast check read this file (theme-tokens.ts), so each
+   token stays one `--name: value;` declaration. */
+
+/* `static` writes every token into the page as a CSS variable, whether a class uses it or not, so the specimen sheet
+   can show them all. */
+@theme static {
+  /* Tailwind's own colours, faces, text sizes, radii and shadows are cleared, so only the brief's tokens exist. */
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+
+  /* The period layer: paper and ink, then the counter and the room. */
+  --color-paper: #f1e7d0;
+  --color-paper-aged: #e6d8b8;
+  --color-paper-edge: #cdbb94;
+  --color-ink: #1f1a14;
+  --color-ink-soft: #685b48;
+  --color-wax: #8c1c13;
+  --color-prussian: #1f3a5f;
+  --color-baize: #2f4a3a;
+  --color-brass: #b8892b;
+  --color-oak: #3b2a1c;
+  --color-night: #1a1410;
+  --color-candle: #f6c56b;
+
+  /* The instrument layer. */
+  --color-glass: #10151a;
+  --color-readout: #d7e0e6;
+  --color-signal: #7fd1c4;
+
+  /* The type scale: 14, 17, 20, 24, 32 and 40px, in rem so a reader's own text-size setting still applies. Body text
+     is --text-base (rule 8: at least 17px). */
+  --text-sm: 0.875rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 2rem;
+  --text-2xl--line-height: 1.2;
+  --text-3xl: 2.5rem;
+  --text-3xl--line-height: 1.15;
+
+  /* Spacing in steps of 4px: `p-4` is 16px. */
+  --spacing: 0.25rem;
+
+  /* Paper has square corners. */
+  --radius-paper: 1px;
+
+  /* A sheet lying on wood, a sheet lifted, and a seal's emboss. */
+  --shadow-resting: 0 1px 2px rgb(0 0 0 / 0.5), 0 3px 8px rgb(0 0 0 / 0.35);
+  --shadow-lifted: 0 2px 4px rgb(0 0 0 / 0.35), 0 14px 28px rgb(0 0 0 / 0.45);
+  --shadow-emboss:
+    inset 0 1px 1px rgb(255 255 255 / 0.3), inset 0 -2px 3px rgb(0 0 0 / 0.35), 0 1px 2px rgb(0 0 0 / 0.4);
+
+  /* Durations. --beat is the gap between things that land one after another, such as the coins. */
+  --quick: 150ms;
+  --settle: 300ms;
+  --stamp: 250ms;
+  --slow: 600ms;
+  --beat: 80ms;
+}
+
+/* The faces. The root layout loads the four period families with next/font, which sets the --face-* variables on
+   <html>. `inline` makes each font class use the value itself, as Next's font guide says to for variables that point
+   at other variables. */
+@theme inline static {
+  --font-text: var(--face-text), Georgia, serif;
+  --font-display: var(--face-display), Georgia, serif;
+  --font-display-sc: var(--face-display-sc), Georgia, serif;
+  --font-hand: var(--face-hand), cursive;
+  --font-instrument: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* The page's own face, and the one Tailwind's base styles give to code. */
+  --default-font-family: var(--font-text);
+  --default-mono-font-family: var(--font-instrument);
+}
+
+/* Oak and baize: layered gradients for grain and cloth (the brief's "Texture and light"). They live here because their
+   stops are raw sizes. */
+@utility texture-oak {
+  background-color: var(--color-oak);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-night) 40%, transparent) 0 1px,
+      transparent 1px 5px,
+      color-mix(in srgb, var(--color-brass) 10%, transparent) 5px 6px,
+      transparent 6px 13px
+    ),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-brass) 14%, transparent), transparent 30%);
+}
+
+@utility texture-baize {
+  background-color: var(--color-baize);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in srgb, var(--color-night) 16%, transparent) 0 1px,
+      transparent 1px 3px
+    ),
+    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--color-paper) 4%, transparent) 0 1px, transparent 1px 3px);
+}
