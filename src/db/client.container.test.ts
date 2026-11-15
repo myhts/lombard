@@ -1,7 +1,9 @@
+import { sql } from "drizzle-orm";
 import pg from "pg";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTestDatabase } from "../../test/postgres";
 import { createDb } from "./client";
+import { errorCodeSuffix } from "./error-code";
 
 describe("createDb", () => {
   afterEach(() => vi.restoreAllMocks());
@@ -23,6 +25,21 @@ describe("createDb", () => {
       expect(logged.mock.calls.flat().join("\n")).toContain("57P01"); // admin_shutdown
     } finally {
       await admin.end();
+      await db.$client.end();
+    }
+  });
+
+  // Pins the installed pg's query-timeout message, which carries no code, to the fixed "(timeout)" word.
+  it("gives a query that outruns the 2 s budget the timeout suffix", async () => {
+    const db = createDb(await createTestDatabase({ migrated: false }));
+    try {
+      const failure = await db.execute(sql`select pg_sleep(3)`).then(
+        () => undefined,
+        (error: unknown) => error,
+      );
+
+      expect(errorCodeSuffix(failure)).toBe(" (timeout)");
+    } finally {
       await db.$client.end();
     }
   });

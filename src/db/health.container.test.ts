@@ -57,6 +57,7 @@ describe("checkHealth", () => {
       // Only fixed strings: an Error object or its message could carry the connection string.
       for (const argument of logged.mock.calls.flat()) expect(typeof argument).toBe("string");
       expect(logged.mock.calls.flat().join("\n")).not.toContain("SENTINEL");
+      expect(logged.mock.calls.flat().join("\n")).toContain("(timeout)");
     } finally {
       await server.close();
     }
