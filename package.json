@@ -22,6 +22,8 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "ui:dev": "UI_DIST_DIR=.next-ui DATABASE_URL=postgres://placeholder@127.0.0.1:9/placeholder ANTHROPIC_API_KEY=placeholder ANTHROPIC_BASE_URL=http://127.0.0.1:9 VOYAGE_API_KEY=placeholder VOYAGE_BASE_URL=http://127.0.0.1:9 next dev -H 127.0.0.1 -p 3001",
+    "ui:shots": "playwright test",
     "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm depcruise && pnpm test && pnpm build"
   },
   "dependencies": {

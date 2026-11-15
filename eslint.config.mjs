@@ -18,5 +18,5 @@ export default defineConfig([
   },
   // Last, so it switches off every style rule above that would fight Prettier.
   prettier,
-  globalIgnores([".next/**", "out/**", "build/**", "coverage/**", "node_modules/**", "learn/**", "next-env.d.ts"]),
+  globalIgnores([".next*/**", "out/**", "build/**", "coverage/**", "node_modules/**", "learn/**", "next-env.d.ts"]),
 ]);

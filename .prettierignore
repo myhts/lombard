@@ -10,6 +10,7 @@ docs/learning/
 .claude/
 # Generated
 .next/
+.next-ui/
 drizzle/
 node_modules/
 coverage/
