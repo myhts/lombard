@@ -91,7 +91,7 @@ another, such as the coins).
 | Oak and baize | Layered gradients for grain and cloth | The page background and the counter | Never |
 | Candlelight | One fixed overlay: a warm radial gradient whose opacity and position drift on a slow, irregular keyframe loop, with a dark vignette at the edges | The period layer's page | Reduced motion, plain mode, and whenever the instrument panel is open over it |
 | Ink caret | A small nib-shaped mark at the end of the text while it streams | The pawnbroker's current line | When the stream ends |
-| Waiting pulse | One shared keyframe loop that fades the ink to faint and back, `--slow` each way | The current stage direction while its tool runs; the composer while it is sending | Reduced motion and plain mode |
+| Waiting pulse | One shared keyframe loop that fades a small ink mark to faint and back, `--slow` each way; the words beside it never fade | Beside the current stage direction while its tool runs; beside the composer's button while it is sending | Reduced motion and plain mode |
 
 Only the candle and one waiting pulse ever loop. Everything else plays once. The waiting pulse is one shared animation:
 it shows on the current stage direction while its tool runs, and on the composer while it is sending.
