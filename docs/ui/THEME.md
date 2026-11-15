@@ -5,8 +5,8 @@ rules. Ticket #16 moved them here from spec #12. The brief is now the source for
 reads, and every later interface ticket points to it.
 
 The **period layer** is the game world: printed paper and ink on a dark oak counter, by candlelight. The
-**instrument layer** is a plain, modern, dark panel in a monospace face that shows what the AI saw and did
-([ADR 0003](../adr/0003-interface-two-layers-css-only.md)).
+**instrument layer** is plain, modern and dark, in a monospace face; its panel, Behind the counter, shows what the AI
+saw and did ([ADR 0003](../adr/0003-interface-two-layers-css-only.md)).
 
 ## Rules for every interface ticket
 
