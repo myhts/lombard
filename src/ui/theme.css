@@ -5,7 +5,12 @@
 /* `static` writes every token into the page as a CSS variable, whether a class uses it or not, so the specimen sheet
    can show them all. */
 @theme static {
-  /* Tailwind's own colours, faces, text sizes, radii and shadows are cleared, so only the brief's tokens exist. */
+  /* Tailwind's own colours, faces, text sizes, radii, shadows and animations are cleared. The first five come only
+     from the brief's tokens below. The animations (`animate-spin`, `animate-pulse` and the like) go so that no component
+     can get a loop the brief doesn't allow: only the candle and the waiting pulse loop.
+     Kept on purpose: breakpoints (`sm:`), container widths (`max-w-5xl`) and line heights (`leading-tight`), which the
+     code uses already, and the easings, which later tickets' transitions will need. Tailwind's remaining defaults (font
+     weights, letter spacing, blur, perspective, aspect ratio) are left alone: the brief sets no token for them. */
   --color-*: initial;
   --font-*: initial;
   --text-*: initial;
@@ -14,6 +19,7 @@
   --inset-shadow-*: initial;
   --drop-shadow-*: initial;
   --text-shadow-*: initial;
+  --animate-*: initial;
 
   /* The period layer: paper and ink, then the counter and the room. */
   --color-paper: #f1e7d0;
