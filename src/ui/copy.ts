@@ -13,6 +13,24 @@ export const copy = {
     appraise: "He weighs it in his hand and reckons.",
     check_notices: "He looks over the notices by the door.",
   },
+  // What stands in the dialogue while the customer waits for the pawnbroker's answer: a saying a London shop of the
+  // 1750s could have known, and what is printed after it (settled in #19). The words are the source's, in modern
+  // spelling and capitals: Fuller's Gnomologia (1732) and Ray's English Proverbs (1737) for the proverbs, the Folger
+  // Shakespeare for the two plays, and the King James Bible for the last. All are long out of copyright, and none
+  // comes from the Old Bailey data.
+  sayings: [
+    { words: "Neither a borrower nor a lender be.", by: "Hamlet" },
+    { words: "All that glisters is not gold.", by: "The Merchant of Venice" },
+    { words: "He that goes a borrowing goes a sorrowing.", by: "Proverb" },
+    { words: "A fool and his money are soon parted.", by: "Proverb" },
+    { words: "Honesty is the best policy.", by: "Proverb" },
+    { words: "Better go to bed supperless than rise in debt.", by: "Proverb" },
+    { words: "Good paymasters need not bring a pawn.", by: "Proverb" },
+    { words: "Out of debt, out of danger.", by: "Proverb" },
+    { words: "Good bargains are pickpockets.", by: "Proverb" },
+    { words: "Debt is the worst poverty.", by: "Proverb" },
+    { words: "The rich ruleth over the poor, and the borrower is servant to the lender.", by: "The Book of Proverbs" },
+  ],
   // The composer. `sending` is read out by a screen reader; on screen, sending is the waiting pulse beside the button.
   composer: {
     label: "What do you say?",
