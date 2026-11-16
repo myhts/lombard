@@ -2,6 +2,7 @@ import { copy } from "@/ui/copy";
 import { Sheet } from "@/ui/period/sheet";
 import { readThemeTokens } from "@/ui/theme-tokens";
 import { ButtonSpecimen, FieldSpecimen, SwitchSpecimen } from "./control-specimens";
+import { ComposerSpecimen, DialogueSpecimen, ExchangeSpecimen, StageDirectionSpecimen } from "./dialogue-specimens";
 import { MoneySpecimen } from "./money-specimen";
 import { RuleSpecimen, SheetSpecimen, ShopSignSpecimen } from "./paper-specimens";
 import { Sample, SpecimenSection } from "./specimen-section";
@@ -73,6 +74,10 @@ export default function SpecimenPage() {
         <ButtonSpecimen />
         <FieldSpecimen />
         <SwitchSpecimen />
+        <DialogueSpecimen />
+        <StageDirectionSpecimen />
+        <ComposerSpecimen />
+        <ExchangeSpecimen />
       </Sheet>
     </main>
   );

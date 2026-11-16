@@ -60,5 +60,23 @@ export const copy = {
       ledger: "In a ledger column",
       pledges: { watch: "A silver watch", buckles: "A pair of buckles", coat: "A cloth coat", ring: "A gold ring" },
     },
+    dialogue: {
+      heading: "The Dialogue",
+      pawnbroker: "A pawnbroker line",
+      customer: "A customer line",
+      streaming: "Streaming",
+      stageDirection: "A stage direction",
+    },
+    stageDirection: { heading: "Stage Directions", running: "while it runs", returned: "after it returns" },
+    composer: { heading: "The Composer", idle: "Idle", sending: "Sending", disabled: "Disabled", over: "Visit over" },
+    // The made-up exchange, in the order it is played. It names no sum, so `Money` stays the one place that writes one.
+    exchange: {
+      heading: "A Made-up Exchange",
+      opening: "Good day to you. I have a silver watch I should like to pledge.",
+      question: "A fair piece, though the case is worn at the hinge. How did you come by it?",
+      answer: "It was my father's. He left it to me this last winter.",
+      verdict:
+        "I find no notice of such a watch, and the records show a like one pledged without complaint. I will lend upon it, if the term suits you.",
+    },
   },
 } as const;
