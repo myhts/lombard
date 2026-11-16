@@ -64,6 +64,13 @@
   --shadow-emboss:
     inset 0 1px 1px rgb(255 255 255 / 0.3), inset 0 -2px 3px rgb(0 0 0 / 0.35), 0 1px 2px rgb(0 0 0 / 0.4);
 
+  /* Aged edges: an inset shadow in paper-edge, heavier at the bottom and right so it isn't even. A shadow token, not a
+     texture utility, so that Tailwind lays it under --shadow-resting or --shadow-lifted instead of replacing them. It
+     has faded out 16px in, so text set inside `p-4` or more keeps its contrast. */
+  --inset-shadow-aged-edges:
+    inset 3px 2px 6px -2px var(--color-paper-edge), inset -5px -7px 14px -4px var(--color-paper-edge),
+    inset 0 0 16px var(--color-paper-edge);
+
   /* Durations. --beat is the gap between things that land one after another, such as the coins. */
   --quick: 150ms;
   --settle: 300ms;
@@ -86,6 +93,24 @@
   --default-font-family: var(--font-text);
   --default-mono-font-family: var(--font-instrument);
 }
+
+/* Hover and focus on the controls: one variant for each, matching the real state and a forced one. A picture can't hover
+   or focus, so the specimen sheet shows a control frozen in a state by setting `data-forced-state` on it
+   (docs/ui/THEME.md, "Hover and focus").
+   The real hover sits behind `(hover: hover)`, as Tailwind's own `hover:` does: on a touch screen a tap leaves `:hover`
+   on a control until the next tap elsewhere, and a tapped button would stay inverted. The forced state is outside that
+   guard, so the specimen sheet shows it on every device. Focus is keyboard focus: a click draws no ring. */
+@custom-variant hovered {
+  @media (hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
+  &[data-forced-state="hover"] {
+    @slot;
+  }
+}
+@custom-variant focused (&:is(:focus-visible, [data-forced-state="focus"]));
 
 /* Oak and baize: layered gradients for grain and cloth (the brief's "Texture and light"). They live here because their
    stops are raw sizes. */
@@ -111,4 +136,57 @@
       transparent 1px 3px
     ),
     repeating-linear-gradient(-45deg, color-mix(in srgb, var(--color-paper) 4%, transparent) 0 1px, transparent 1px 3px);
+}
+
+/* Gilt: the four stops of the gradient that shades a gilded object, such as the shop sign's balls, from the glint to
+   the side in shade (the brief's "Pictures"). An SVG `<stop>` takes its colour from a class. They live here because
+   the first and last are mixes of two tokens, and so that every gilded thing is the same gold. */
+@utility stop-gilt-glint {
+  stop-color: color-mix(in srgb, var(--color-candle) 40%, var(--color-paper));
+}
+
+@utility stop-gilt-lit {
+  stop-color: var(--color-candle);
+}
+
+@utility stop-gilt-body {
+  stop-color: var(--color-brass);
+}
+
+@utility stop-gilt-shade {
+  stop-color: color-mix(in srgb, var(--color-oak) 75%, var(--color-brass));
+}
+
+/* Laid paper, for every paper surface: faint horizontal lines over a fine grain, both laid over whichever paper colour
+   the surface has. The grain is an inline SVG `feTurbulence` filter, written into the stylesheet as a data URL: grey
+   noise at half opacity, with no colour of its own.
+   The texture must not darken the paper, because soft ink on aged paper has little contrast to spare (4.7 to 1, of the
+   4.5 rule 8 asks for). So each laid line is a light edge beside a dark one, and the grain is blended as an overlay,
+   which lightens as much as it darkens: the paper's average colour stays its token. */
+@utility texture-laid {
+  background-image:
+    repeating-linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.35) 0 1px,
+      color-mix(in srgb, var(--color-paper-edge) 25%, transparent) 1px 2px,
+      transparent 2px 4px
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0.5'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-blend-mode: normal, overlay;
+}
+
+/* Pressed type: a very light shadow, so the ink looks pressed into the paper. For display type only, never body text
+   (the brief's "Texture and light"). */
+@utility type-pressed {
+  text-shadow:
+    0 1px 0 rgb(255 255 255 / 0.6),
+    0 -0.5px 0.5px color-mix(in srgb, var(--color-ink) 22%, transparent);
+}
+
+/* One column of `Money`'s ledger form: wide enough for `19s` or `11d`, so the units of every row line up. It lives here
+   because its width is a raw size. */
+@utility money-column {
+  display: inline-block;
+  min-width: 3ch;
+  text-align: right;
 }

@@ -59,7 +59,7 @@ lines are also cheap to build well in CSS, need almost no images and stay readab
 | `--color-brass` | `#b8892b` | The three balls, coins, rules on dark wood. Decoration only, never text on paper | — |
 | `--color-oak` | `#3b2a1c` | The counter's edge, panels | — |
 | `--color-night` | `#1a1410` | The page background around the counter | — |
-| `--color-candle` | `#f6c56b` | The candle's glow, text on night and on baize | on night, on baize |
+| `--color-candle` | `#f6c56b` | The candle's glow, text on night, on baize and on the shop sign's oak board | on night, on baize, on oak |
 | `--color-glass` | `#10151a` | The instrument layer's background | — |
 | `--color-readout` | `#d7e0e6` | The instrument layer's text | on glass |
 | `--color-signal` | `#7fd1c4` | The instrument layer's highlights | on glass |
@@ -81,7 +81,8 @@ implementer picks the nearest from the same tradition and records it in the brie
 `--text-lg` (20px), `--text-xl` (24px), `--text-2xl` (32px) and `--text-3xl` (40px), the three largest with their own
 line heights (1.3, 1.2 and 1.15); spacing in steps of 4px (`--spacing`); `--radius-paper: 1px` (paper has square
 corners); three shadows: `--shadow-resting` (a sheet lying on wood), `--shadow-lifted` (a sheet lifted) and
-`--shadow-emboss` (a seal's emboss); durations `--quick: 150ms`, `--settle: 300ms`, `--stamp: 250ms`, `--slow: 600ms`,
+`--shadow-emboss` (a seal's emboss); one inset shadow, `--inset-shadow-aged-edges` (the aged edges of the texture table,
+which lies under either sheet shadow); durations `--quick: 150ms`, `--settle: 300ms`, `--stamp: 250ms`, `--slow: 600ms`,
 `--beat: 80ms` (the gap between things that land one after another, such as the coins).
 
 **Texture and light:**
@@ -109,7 +110,7 @@ and the fix when a phone struggles.
 |---|---|---|---|
 | `Sheet` | A sheet of paper lying on the counter | Any content; the base for most others | plain, aged, lifted |
 | `Rule`, `Fleuron` | A printer's rule and a printer's flower, as hand-coded SVG | Dividers and ornaments | thin, double, with flower |
-| `ShopSign` | The pawnbroker's three golden balls on a bracket | The shop's name | open, closed |
+| `ShopSign` | The pawnbroker's three gilt balls hanging from a wrought-iron bar | The shop's name | open, closed |
 | `Dialogue` | A printed dialogue, set like the question-and-answer text of the Proceedings: the speaker's name in small capitals, then the words | The conversation. No chat bubbles | pawnbroker line, customer line, streaming, stage direction |
 | `StageDirection` | An italic aside | What the pawnbroker is doing while a tool runs | one per tool |
 | `Composer` | The space where the customer speaks | A text box, a "Say it" button, the turns left | idle, sending, disabled, visit over |
@@ -124,6 +125,10 @@ and the fix when a phone struggles.
 | `Coins` | Coins counted onto the counter | The loan paid out; at most five coins drawn, whatever the sum | — |
 | `Broadside` | A large printed sheet for news | The visit's outcome and score; the constable being called; the shop closed | accepted, refused, constable, closed |
 | `Button`, `Field`, `Switch` | — | Plain controls dressed in ink and paper | default, hover, focus, disabled |
+
+**Hover and focus.** A piece's hover and focus styles use the theme's `hovered:` and `focused:` variants, never
+Tailwind's `hover:` and `focus-visible:`. Each also matches `data-forced-state="hover"` or `"focus"`, which is how the
+specimen sheet shows a piece frozen in a state. The real hover applies only on a device that can hover.
 
 **Instrument pieces:**
 
@@ -189,6 +194,12 @@ real route a wiring ticket adds later.
 
 - **Ornaments are drawn in code:** the three balls, rules, printer's flowers, the coins, the pointing hand. Hand-written
   SVG in the tokens' colours.
+  - **Objects in the shop** (the three balls, the coins) are drawn as the objects themselves: shaded with soft
+    gradients in the tokens' colours, with a cast shadow. Never a flat icon with an outline and a dot of light.
+  - **Printed marks** (rules, printer's flowers, the pointing hand) stay flat ink, as type is.
+  - **Gilt** is one radial gradient, lit from the upper left: candle mixed with paper at the glint, then candle, then
+    brass, then oak mixed with brass in the shade (the `stop-gilt-*` utilities). The cast shadow is blurred ink, down
+    and to the right. Ironwork takes the colour of the text around it.
 - **Engravings come from open collections, in the art pass only.** Three to five, tinted to the palette, each under
   150 KB. Candidates: William Hogarth's "Gin Lane" (1751), which shows a pawnbroker's shop under its three balls; John
   Rocque's 1746 map of London; street views of the 1750s. Files come only from collections that mark them public domain
@@ -203,8 +214,11 @@ real route a wiring ticket adds later.
 - `Money` takes whole pence as an integer. 12 pence make a shilling and 20 shillings make a pound.
 - Inline form: `0d`, `11d`, `1s`, `19s 11d`, `£1`, `£1 4s 6d`. Trailing zero parts are dropped; a zero between two parts
   is kept (`£1 0s 6d`).
-- Ledger form: three aligned columns, always all three.
+- Ledger form: three aligned columns, always all three, each with its own unit (`£0 0s 6d`). Its caller right-aligns
+  the column of amounts.
+- Neither form has a thousands separator (`£1000`), and an amount never wraps.
+- The accessible name is the visible text. There is no spoken form.
 - An amount that isn't a whole number of pence, or is below zero, is an error, not a rounded display
-  (`CODING_STANDARDS.md`, "Failures are visible").
+  (`CODING_STANDARDS.md`, "Failures are visible"). So is `NaN`, an infinite amount, or an integer too large to be safe.
 - Which code may display pounds, shillings and pence, and which may parse them, is settled in the coding standards
   (`CODING_STANDARDS.md`, "Money is whole pence").

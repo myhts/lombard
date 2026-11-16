@@ -13,6 +13,7 @@ const textPairs = [
   ["--color-baize", "--color-paper"],
   ["--color-candle", "--color-night"],
   ["--color-candle", "--color-baize"],
+  ["--color-candle", "--color-oak"],
   ["--color-readout", "--color-glass"],
   ["--color-signal", "--color-glass"],
 ] as const;
