@@ -19,17 +19,20 @@ export const copy = {
   // Shakespeare for the two plays, and the King James Bible for the last. All are long out of copyright, and none
   // comes from the Old Bailey data.
   sayings: [
-    { words: "Neither a borrower nor a lender be.", by: "Hamlet" },
-    { words: "All that glisters is not gold.", by: "The Merchant of Venice" },
-    { words: "He that goes a borrowing goes a sorrowing.", by: "Proverb" },
-    { words: "A fool and his money are soon parted.", by: "Proverb" },
-    { words: "Honesty is the best policy.", by: "Proverb" },
-    { words: "Better go to bed supperless than rise in debt.", by: "Proverb" },
-    { words: "Good paymasters need not bring a pawn.", by: "Proverb" },
-    { words: "Out of debt, out of danger.", by: "Proverb" },
-    { words: "Good bargains are pickpockets.", by: "Proverb" },
-    { words: "Debt is the worst poverty.", by: "Proverb" },
-    { words: "The rich ruleth over the poor, and the borrower is servant to the lender.", by: "The Book of Proverbs" },
+    { words: "Neither a borrower nor a lender be.", source: "Hamlet" },
+    { words: "All that glisters is not gold.", source: "The Merchant of Venice" },
+    { words: "He that goes a borrowing goes a sorrowing.", source: "Proverb" },
+    { words: "A fool and his money are soon parted.", source: "Proverb" },
+    { words: "Honesty is the best policy.", source: "Proverb" },
+    { words: "Better go to bed supperless than rise in debt.", source: "Proverb" },
+    { words: "Good paymasters need not bring a pawn.", source: "Proverb" },
+    { words: "Out of debt, out of danger.", source: "Proverb" },
+    { words: "Good bargains are pickpockets.", source: "Proverb" },
+    { words: "Debt is the worst poverty.", source: "Proverb" },
+    {
+      words: "The rich ruleth over the poor, and the borrower is servant to the lender.",
+      source: "The Book of Proverbs",
+    },
   ],
   // The composer. `sending` is read out by a screen reader; on screen, sending is the waiting pulse beside the button.
   composer: {

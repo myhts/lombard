@@ -35,7 +35,7 @@ function WaitingSaying({ place }: { place: number }) {
       <InkCaret writing />
       <span>
         <span className="italic">{saying.words}</span>{" "}
-        <span className="font-display-sc whitespace-nowrap">{saying.by}</span>
+        <span className="font-display-sc whitespace-nowrap">{saying.source}</span>
       </span>
     </p>
   );

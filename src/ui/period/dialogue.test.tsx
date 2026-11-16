@@ -77,10 +77,10 @@ describe("Dialogue", () => {
     ["Good bargains are pickpockets.", "Proverb"],
     ["Debt is the worst poverty.", "Proverb"],
     ["The rich ruleth over the poor, and the borrower is servant to the lender.", "The Book of Proverbs"],
-  ])("shows the saying %j, from %s, by its place in the copy file", (words, by) => {
+  ])("shows the saying %j, from %s, by its place in the copy file", (words, source) => {
     const place = copy.sayings.findIndex((saying) => saying.words === words);
 
-    expect(textOf(renderToStaticMarkup(<Dialogue lines={[{ saying: place }]} />))).toBe(`${words} ${by}`);
+    expect(textOf(renderToStaticMarkup(<Dialogue lines={[{ saying: place }]} />))).toBe(`${words} ${source}`);
   });
 
   it("holds eleven sayings", () => {
