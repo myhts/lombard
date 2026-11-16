@@ -83,12 +83,20 @@ describe("Dialogue", () => {
     expect(textOf(renderToStaticMarkup(<Dialogue lines={[{ saying: place }]} />))).toBe(`${words} ${by}`);
   });
 
-  it("holds eleven sayings, starts again from the first past the last, and refuses a place that is no whole number", () => {
+  it("holds eleven sayings", () => {
+    expect(copy.sayings).toHaveLength(11);
+  });
+
+  it("starts again from the first saying past the last, so a caller can count up", () => {
     const past = renderToStaticMarkup(<Dialogue lines={[{ saying: copy.sayings.length }]} />);
 
-    expect(copy.sayings).toHaveLength(11);
     expect(textOf(past)).toBe("Neither a borrower nor a lender be. Hamlet");
-    expect(() => renderToStaticMarkup(<Dialogue lines={[{ saying: 0.5 }]} />)).toThrow("0.5");
-    expect(() => renderToStaticMarkup(<Dialogue lines={[{ saying: -1 }]} />)).toThrow("-1");
+  });
+
+  // -11 is a multiple of the list's length: its remainder is -0, which would find the first saying.
+  it.each([0.5, -1, -11])("refuses %j as a saying's place, because it is no whole number from 0 up", (place) => {
+    expect(() => renderToStaticMarkup(<Dialogue lines={[{ saying: place }]} />)).toThrow(
+      `A saying's place is a whole number, zero or more, but got ${String(place)}`,
+    );
   });
 });

@@ -24,9 +24,10 @@ const setting = {
 // never carries the Pawnbroker's name, so it can't be taken for his answer. It is decoration, so the whole line is
 // hidden from assistive technology; the log is busy meanwhile, and the composer's status says "Sending".
 function WaitingSaying({ place }: { place: number }) {
-  const saying = copy.sayings[place % copy.sayings.length];
   // Only a whole number, zero or more, finds a saying. Anything else is a fault in the caller's counting, and showing
-  // some saying anyway would hide it.
+  // some saying anyway would hide it. The place is checked before the list is read, because a negative multiple of the
+  // list's length leaves a remainder of -0, which would find the first saying.
+  const saying = Number.isInteger(place) && place >= 0 ? copy.sayings[place % copy.sayings.length] : undefined;
   if (!saying) throw new Error(`A saying's place is a whole number, zero or more, but got ${String(place)}`);
 
   return (
