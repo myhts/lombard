@@ -110,7 +110,7 @@ and the fix when a phone struggles.
 |---|---|---|---|
 | `Sheet` | A sheet of paper lying on the counter | Any content; the base for most others | plain, aged, lifted |
 | `Rule`, `Fleuron` | A printer's rule and a printer's flower, as hand-coded SVG | Dividers and ornaments | thin, double, with flower |
-| `ShopSign` | The pawnbroker's three golden balls on a bracket | The shop's name | open, closed |
+| `ShopSign` | The pawnbroker's three gilt balls hanging from a wrought-iron bar | The shop's name | open, closed |
 | `Dialogue` | A printed dialogue, set like the question-and-answer text of the Proceedings: the speaker's name in small capitals, then the words | The conversation. No chat bubbles | pawnbroker line, customer line, streaming, stage direction |
 | `StageDirection` | An italic aside | What the pawnbroker is doing while a tool runs | one per tool |
 | `Composer` | The space where the customer speaks | A text box, a "Say it" button, the turns left | idle, sending, disabled, visit over |
