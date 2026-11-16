@@ -8,7 +8,8 @@ import { Sample, SpecimenSection } from "./specimen-section";
 
 const { dialogue, stageDirection, composer, exchange } = copy.specimen;
 
-// Each state of the dialogue, frozen: the streaming line stops part-way, with the ink caret at its end.
+// Each state of the dialogue, frozen: the streaming line stops part-way, with the ink caret at its end. The waiting
+// line shows the longest saying, the one that has to wrap on a phone.
 const dialogueStates: { label: string; line: DialogueLine }[] = [
   { label: dialogue.pawnbroker, line: { speaker: "pawnbroker", words: exchange.question } },
   { label: dialogue.customer, line: { speaker: "customer", words: exchange.answer } },
@@ -16,6 +17,7 @@ const dialogueStates: { label: string; line: DialogueLine }[] = [
     label: dialogue.streaming,
     line: { speaker: "pawnbroker", words: exchange.question.slice(0, exchange.question.indexOf(",")), streaming: true },
   },
+  { label: dialogue.waiting, line: { saying: copy.sayings.length - 1 } },
   { label: dialogue.stageDirection, line: { tool: "appraise", running: true } },
 ];
 

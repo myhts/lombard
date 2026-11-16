@@ -83,6 +83,7 @@ export const copy = {
       pawnbroker: "A pawnbroker line",
       customer: "A customer line",
       streaming: "Streaming",
+      waiting: "Waiting, with a saying",
       stageDirection: "A stage direction",
     },
     stageDirection: { heading: "Stage Directions", running: "while it runs", returned: "after it returns" },

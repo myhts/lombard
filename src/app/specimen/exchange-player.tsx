@@ -8,14 +8,17 @@ import { Rule } from "@/ui/period/rule";
 
 const { exchange } = copy.specimen;
 
-// The made-up exchange, in order. A stage direction stands for a tool that runs and returns.
+// The made-up exchange, in order. A stage direction stands for a tool that runs and returns. A saying stands where the
+// pawnbroker's next line will appear, a different one before each, until his words take its place.
 const script = [
   { speaker: "customer", words: exchange.opening },
   { tool: "appraise" },
+  { saying: 0 },
   { speaker: "pawnbroker", words: exchange.question },
   { speaker: "customer", words: exchange.answer },
   { tool: "search_records" },
   { tool: "check_notices" },
+  { saying: 7 },
   { speaker: "pawnbroker", words: exchange.verdict },
 ] as const;
 
@@ -23,6 +26,9 @@ const script = [
 const TICK_MS = 60;
 const PAUSE_TICKS = 10;
 const TOOL_TICKS = 16;
+// Long enough to read one saying: about three and a half seconds. A real wait changes its saying every five seconds
+// (docs/ui/THEME.md, "The dialogue"); this one ends before it would.
+const SAYING_TICKS = 58;
 // The turns the customer has once the script has played out.
 const TURNS = 3;
 
@@ -36,6 +42,9 @@ function exchangeAt(tick: number): { lines: DialogueLine[]; playing: boolean } {
     if ("tool" in step) {
       lines.push({ tool: step.tool, running: elapsed < TOOL_TICKS });
       start += TOOL_TICKS;
+    } else if ("saying" in step) {
+      if (elapsed < SAYING_TICKS) lines.push(step);
+      start += SAYING_TICKS;
     } else if (step.speaker === "pawnbroker") {
       const words = step.words.split(" ");
       const arrived = words.slice(0, elapsed + 1);
