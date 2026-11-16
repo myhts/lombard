@@ -144,6 +144,8 @@ specimen sheet shows a piece frozen in a state. The real hover applies only on a
     the box can still be written in. **disabled:** the box and the button are held. **visit over:** both are held, and
     "The visit is over." stands in place of the turns left.
   - The turns left read "3 turns left", "1 turn left", "No turns left".
+- **The specimen player.** How fast the specimen sheet's made-up exchange plays is demo data in `src/app/specimen/`,
+  not a theme timing, and no piece in `src/ui/` holds a duration (rule 3).
 
 **Instrument pieces:**
 
