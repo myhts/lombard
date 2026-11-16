@@ -83,7 +83,8 @@ line heights (1.3, 1.2 and 1.15); spacing in steps of 4px (`--spacing`); `--radi
 corners); three shadows: `--shadow-resting` (a sheet lying on wood), `--shadow-lifted` (a sheet lifted) and
 `--shadow-emboss` (a seal's emboss); one inset shadow, `--inset-shadow-aged-edges` (the aged edges of the texture table,
 which lies under either sheet shadow); durations `--quick: 150ms`, `--settle: 300ms`, `--stamp: 250ms`, `--slow: 600ms`,
-`--beat: 80ms` (the gap between things that land one after another, such as the coins).
+`--beat: 80ms` (the gap between things that land one after another, such as the coins); `--pulse-faint: 0.2` (the
+opacity the waiting pulse's mark fades to).
 
 **Texture and light:**
 
@@ -94,8 +95,8 @@ which lies under either sheet shadow); durations `--quick: 150ms`, `--settle: 30
 | Pressed type | A very light text shadow so the ink looks pressed into the paper | Display type only, never body text | Never |
 | Oak and baize | Layered gradients for grain and cloth | The page background and the counter | Never |
 | Candlelight | One fixed overlay: a warm radial gradient whose opacity and position drift on a slow, irregular keyframe loop, with a dark vignette at the edges | The period layer's page | Reduced motion, plain mode, and whenever the instrument panel is open over it |
-| Ink caret | A small nib-shaped mark at the end of the text while it streams | The pawnbroker's current line | When the stream ends |
-| Waiting pulse | One shared keyframe loop that fades a small ink mark to faint and back, `--slow` each way; the words beside it never fade | Beside the current stage direction while its tool runs; beside the composer's button while it is sending | Reduced motion and plain mode |
+| Ink caret | A small nib-shaped mark at the end of the text while it streams. It never blinks | The pawnbroker's current line | When the stream ends |
+| Waiting pulse | One shared keyframe loop that fades a small round ink dot to `--pulse-faint` and back, `--slow` each way; the words beside it never fade | Beside the current stage direction while its tool runs; beside the composer's button while it is sending | Reduced motion and plain mode: the dot stays, still and at full ink |
 
 Only the candle and one waiting pulse ever loop. Everything else plays once. The waiting pulse is one shared animation:
 it shows on the current stage direction while its tool runs, and on the composer while it is sending.
@@ -129,6 +130,20 @@ and the fix when a phone struggles.
 **Hover and focus.** A piece's hover and focus styles use the theme's `hovered:` and `focused:` variants, never
 Tailwind's `hover:` and `focus-visible:`. Each also matches `data-forced-state="hover"` or `"focus"`, which is how the
 specimen sheet shows a piece frozen in a state. The real hover applies only on a device that can hover.
+
+**The dialogue** (settled in #19).
+
+- **Speakers.** The two names are "Pawnbroker" and "Customer", from the copy file. A line is the name in small capitals
+  and a full stop, then the words. The dialogue is a log named "The conversation", and is marked busy while a line
+  streams.
+- **Stage directions.** One line to each tool, keyed by the tool's name in the copy file. The line stays when its tool
+  returns; only the waiting pulse beside it goes.
+- **The composer.** The text box is two rows, dressed like `Field` and labelled "What do you say?". Enter sends and
+  Shift+Enter starts a new line. A blank line isn't sent. After sending, the box is cleared and keeps the focus.
+  - **idle:** the box and the button are open. **sending:** the button is held and the waiting pulse shows beside it;
+    the box can still be written in. **disabled:** the box and the button are held. **visit over:** both are held, and
+    "The visit is over." stands in place of the turns left.
+  - The turns left read "3 turns left", "1 turn left", "No turns left".
 
 **Instrument pieces:**
 
