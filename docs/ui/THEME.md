@@ -204,8 +204,11 @@ real route a wiring ticket adds later.
 - `Money` takes whole pence as an integer. 12 pence make a shilling and 20 shillings make a pound.
 - Inline form: `0d`, `11d`, `1s`, `19s 11d`, `£1`, `£1 4s 6d`. Trailing zero parts are dropped; a zero between two parts
   is kept (`£1 0s 6d`).
-- Ledger form: three aligned columns, always all three.
+- Ledger form: three aligned columns, always all three, each with its own unit (`£0 0s 6d`). Its caller right-aligns
+  the column of amounts.
+- Neither form has a thousands separator (`£1000`), and an amount never wraps.
+- The accessible name is the visible text. There is no spoken form.
 - An amount that isn't a whole number of pence, or is below zero, is an error, not a rounded display
-  (`CODING_STANDARDS.md`, "Failures are visible").
+  (`CODING_STANDARDS.md`, "Failures are visible"). So is `NaN`, an infinite amount, or an integer too large to be safe.
 - Which code may display pounds, shillings and pence, and which may parse them, is settled in the coding standards
   (`CODING_STANDARDS.md`, "Money is whole pence").

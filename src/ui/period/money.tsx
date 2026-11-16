@@ -30,8 +30,7 @@ export function formatMoney(pence: number, form: MoneyForm = "inline"): string {
   return parts.slice(first, amounts.findLastIndex((amount) => amount > 0) + 1).join(" ");
 }
 
-// The accessible name is the visible text; there is no spoken form (#18, "Settled before building"). The amount never
-// wraps.
+// The accessible name is the visible text, with no spoken form, and the amount never wraps (docs/ui/THEME.md, "Money").
 export function Money({ pence, form = "inline" }: { pence: number; form?: MoneyForm }) {
   if (form === "inline") return <span className="whitespace-nowrap">{formatMoney(pence)}</span>;
 
