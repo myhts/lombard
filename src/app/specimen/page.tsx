@@ -1,18 +1,9 @@
-import type { ReactNode } from "react";
 import { copy } from "@/ui/copy";
 import { readThemeTokens } from "@/ui/theme-tokens";
+import { MoneySpecimen } from "./money-specimen";
+import { Sample, SpecimenSection } from "./specimen-section";
 
-// One entry of the type specimen: the token it shows, in soft ink, then the sample itself.
-function Sample({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="mt-6">
-      <p className="text-sm text-ink-soft">{label}</p>
-      {children}
-    </div>
-  );
-}
-
-// The specimen sheet (GLOSSARY.md). Each <section data-specimen> is one picture from `pnpm ui:shots`.
+// The specimen sheet (GLOSSARY.md). Each section is one picture from `pnpm ui:shots`.
 export default function SpecimenPage() {
   // Names and values come from the theme stylesheet itself, so a new colour or size shows up here without an edit.
   const tokens = [...readThemeTokens()];
@@ -26,8 +17,7 @@ export default function SpecimenPage() {
       <h1 className="font-display text-2xl sm:text-3xl">{copy.specimen.title}</h1>
       <p className="italic">{copy.specimen.madeUpData}</p>
 
-      <section data-specimen="palette" className="mt-10">
-        <h2 className="font-display-sc text-xl">{palette.heading}</h2>
+      <SpecimenSection id="palette" heading={palette.heading}>
         <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {colours.map(([name, value]) => (
             <li key={name}>
@@ -40,10 +30,9 @@ export default function SpecimenPage() {
             </li>
           ))}
         </ul>
-      </section>
+      </SpecimenSection>
 
-      <section data-specimen="type" className="mt-10">
-        <h2 className="font-display-sc text-xl">{type.heading}</h2>
+      <SpecimenSection id="type" heading={type.heading}>
         <Sample label={`--font-text · ${type.text.face}`}>
           <p className="text-lg">{type.text.sample}</p>
           <p className="text-lg italic">{type.text.italicSample}</p>
@@ -72,7 +61,9 @@ export default function SpecimenPage() {
             </p>
           </Sample>
         ))}
-      </section>
+      </SpecimenSection>
+
+      <MoneySpecimen />
     </main>
   );
 }

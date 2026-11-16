@@ -112,3 +112,11 @@
     ),
     repeating-linear-gradient(-45deg, color-mix(in srgb, var(--color-paper) 4%, transparent) 0 1px, transparent 1px 3px);
 }
+
+/* One column of `Money`'s ledger form: wide enough for `19s` or `11d`, so the units of every row line up. It lives here
+   because its width is a raw size. */
+@utility money-column {
+  display: inline-block;
+  min-width: 3ch;
+  text-align: right;
+}

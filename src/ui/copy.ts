@@ -18,5 +18,12 @@ export const copy = {
       instrument: { face: "System monospace", sample: "search_records  3 hits  212 ms" },
       sizes: { heading: "The Sizes", sample: "A silver watch" },
     },
+    money: {
+      heading: "Money",
+      inline: "Inline",
+      sentence: "Lent upon a silver watch, the sum of",
+      ledger: "In a ledger column",
+      pledges: { watch: "A silver watch", buckles: "A pair of buckles", coat: "A cloth coat", ring: "A gold ring" },
+    },
   },
 } as const;
