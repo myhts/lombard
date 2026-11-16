@@ -28,6 +28,12 @@ export const copy = {
     },
     rule: { heading: "Rules and Flowers", thin: "Thin", double: "Double", flower: "With flower", fleuron: "Fleuron" },
     shopSign: { heading: "The Shop Sign", open: "Open", closed: "Closed", name: "The Three Balls" },
+    controls: {
+      states: { default: "Default", hover: "Hover", focus: "Focus", disabled: "Disabled" },
+      button: { heading: "The Button", text: "Say it" },
+      field: { heading: "The Field", label: "Invite code", value: "WATCH-1753" },
+      switch: { heading: "The Switch", off: "Snuff the candle: off", on: "Snuff the candle: on" },
+    },
     money: {
       heading: "Money",
       inline: "Inline",

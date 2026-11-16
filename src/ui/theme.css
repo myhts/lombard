@@ -94,6 +94,12 @@
   --default-mono-font-family: var(--font-instrument);
 }
 
+/* Hover and focus on the controls, real or forced. The specimen sheet shows a control frozen in each state by setting
+   `data-forced-state` on it, and a picture can't hover or focus, so both variants match that attribute from the same
+   rule as the real state (#18, "Settled before building"). Focus is keyboard focus: a click draws no ring. */
+@custom-variant hovered (&:is(:hover, [data-forced-state="hover"]));
+@custom-variant focused (&:is(:focus-visible, [data-forced-state="focus"]));
+
 /* Oak and baize: layered gradients for grain and cloth (the brief's "Texture and light"). They live here because their
    stops are raw sizes. */
 @utility texture-oak {
