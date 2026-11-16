@@ -25,7 +25,7 @@ export function Composer({
   className?: string;
 }) {
   const box = useRef<HTMLTextAreaElement>(null);
-  const closed = state === "disabled" || state === "over";
+  const held = state === "disabled" || state === "over";
 
   function say(event: SyntheticEvent) {
     event.preventDefault();
@@ -49,13 +49,13 @@ export function Composer({
     <form onSubmit={say} className={`text-ink ${className}`}>
       <label className="flex flex-col gap-1 has-disabled:text-ink-soft">
         <span>{copy.composer.label}</span>
-        <textarea ref={box} rows={2} disabled={closed} onKeyDown={sendOnEnter} className={`resize-none ${textBox}`} />
+        <textarea ref={box} rows={2} disabled={held} onKeyDown={sendOnEnter} className={`resize-none ${textBox}`} />
       </label>
       <div className="mt-2 flex items-center gap-3">
         <Button type="submit" disabled={state !== "idle"}>
           {copy.composer.say}
         </Button>
-        {/* Always here, so a screen reader hears "Sending" when it appears. The dot is the theme's waiting pulse. */}
+        {/* Always here, so a screen reader hears "Sending" when it appears. On screen, sending is the waiting pulse. */}
         <span role="status">
           {state === "sending" && (
             <>

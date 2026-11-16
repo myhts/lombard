@@ -16,7 +16,7 @@ describe("StageDirection", () => {
     expect(textOf(renderToStaticMarkup(<StageDirection tool={tool} />))).toBe(line);
   });
 
-  it("carries the waiting mark only while its tool runs, and the mark adds no words", () => {
+  it("carries the waiting pulse only while its tool runs, and the pulse adds no words", () => {
     const running = renderToStaticMarkup(<StageDirection tool="appraise" running />);
     const returned = renderToStaticMarkup(<StageDirection tool="appraise" />);
 

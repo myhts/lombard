@@ -13,7 +13,7 @@ export const copy = {
     appraise: "He weighs it in his hand and reckons.",
     check_notices: "He looks over the notices by the door.",
   },
-  // The composer. `sending` is read out by a screen reader; on screen, sending is the waiting mark beside the button.
+  // The composer. `sending` is read out by a screen reader; on screen, sending is the waiting pulse beside the button.
   composer: {
     label: "What do you say?",
     say: "Say it",
