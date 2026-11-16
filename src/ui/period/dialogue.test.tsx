@@ -1,11 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { copy } from "../copy";
+import { textOf } from "../text-of";
 import { Dialogue } from "./dialogue";
 
 describe("Dialogue", () => {
-  const textOf = (markup: string) => markup.replace(/<[^>]+>/g, "");
-
   it("sets each line as the speaker's name, then the words, and is named as the conversation", () => {
     const markup = renderToStaticMarkup(
       <Dialogue

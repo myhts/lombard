@@ -1,11 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { copy } from "../copy";
+import { textOf } from "../text-of";
 import { StageDirection } from "./stage-direction";
 
 describe("StageDirection", () => {
-  const textOf = (markup: string) => markup.replace(/<[^>]+>/g, "");
-
   // The wording of the brief's event table (docs/ui/THEME.md), one line to each tool.
   it.each([
     ["search_records", "He turns the pages of the Proceedings."],

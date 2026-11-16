@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { textOf } from "../text-of";
 import { Rule } from "./rule";
 
 describe("Rule", () => {
@@ -8,6 +9,6 @@ describe("Rule", () => {
 
     // The outermost element carries the hiding, so nothing inside it, the flower included, is announced.
     expect(markup).toMatch(/^<[a-z]+ [^>]*aria-hidden="true"/);
-    expect(markup.replace(/<[^>]+>/g, "")).toBe("");
+    expect(textOf(markup)).toBe("");
   });
 });

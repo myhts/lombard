@@ -1,10 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { textOf } from "../text-of";
 import { Composer } from "./composer";
 
 // A render test runs no handlers, so sending by keyboard is checked in the browser (test/ui/specimen.shots.ts).
 describe("Composer", () => {
-  const textOf = (markup: string) => markup.replace(/<[^>]+>/g, "");
   const box = (markup: string) => /<textarea [^>]*>/.exec(markup)?.[0];
   const button = (markup: string) => /<button [^>]*>/.exec(markup)?.[0];
 
