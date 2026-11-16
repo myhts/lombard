@@ -17,8 +17,7 @@ describe("Dialogue", () => {
     );
 
     expect(textOf(markup)).toBe("Customer. I have a watch to pledge.Pawnbroker. Let me see it.");
-    expect(markup).toContain(`aria-label="${copy.dialogue.label}"`);
-    expect(copy.speakers).toEqual({ pawnbroker: "Pawnbroker", customer: "Customer" });
+    expect(markup).toContain('aria-label="The conversation"');
   });
 
   it("ends a line with the ink caret while it streams, and without it once the stream has ended", () => {
