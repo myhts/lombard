@@ -11,6 +11,10 @@ wrote it; edit it by hand whenever the project changes.
   shape in its "No pack" list.
 - **Next.js docs:** Next 16 postdates most training data. Before writing Next.js code, read the guide for the installed
   version in `node_modules/next/dist/docs/`.
+- **Model SDK docs:** for `@anthropic-ai/sdk`, `voyageai` and the MCP SDK, the installed version is the only source.
+  Before writing code that calls one, read its README and type declarations in `node_modules/<package>/`, and take
+  every parameter and response field from there, not from memory. API version `2026-10-21` rejects `temperature`,
+  `top_p` and `top_k`, and Haiku 5.5 rejects assistant prefill (plan, section 5).
 - **Release age:** `pnpm-workspace.yaml` sets `minimumReleaseAge: 20160` (14 days), so pnpm refuses any younger
   release, transitive ones included. It holds settings only; there's no `packages:` field and this isn't a workspace.
 - **Versions held back:** TypeScript is pinned at 6.0.3; TS 7 (plan, section 11) waits until typescript-eslint
@@ -86,6 +90,11 @@ Every colour, face, size and timing is a token in `src/ui/theme.css`, and every 
 - **Base branch:** main
 - **Budget:** about 400 changed lines, not counting lockfiles, generated code or snapshots. Over budget, `/implement`
   proposes a split; CI labels any larger PR `size/large`.
+- **Eval numbers:** a PR that changes search, a prompt, a tool description or a tool's schema states the matching
+  eval's numbers before and after the change in its body (plan, section 10). Green tests can't show this: they run
+  against the model fake. The owner runs the eval, so `/implement` asks for the run before it opens the PR. The rule
+  starts when each eval exists: retrieval in slice 2, extraction in slice 3, grounding in slice 5, the shop eval in
+  slice 6.
 
 ## Deploy
 
