@@ -206,3 +206,5 @@ real route a wiring ticket adds later.
 - Ledger form: three aligned columns, always all three.
 - An amount that isn't a whole number of pence, or is below zero, is an error, not a rounded display
   (`CODING_STANDARDS.md`, "Failures are visible").
+- Which code may display pounds, shillings and pence, and which may parse them, is settled in the coding standards
+  (`CODING_STANDARDS.md`, "Money is whole pence").
