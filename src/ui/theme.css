@@ -138,6 +138,25 @@
     repeating-linear-gradient(-45deg, color-mix(in srgb, var(--color-paper) 4%, transparent) 0 1px, transparent 1px 3px);
 }
 
+/* Gilt: the four stops of the gradient that shades a gilded object, such as the shop sign's balls, from the glint to
+   the side in shade (the brief's "Pictures"). An SVG `<stop>` takes its colour from a class. They live here because
+   the first and last are mixes of two tokens, and so that every gilded thing is the same gold. */
+@utility stop-gilt-glint {
+  stop-color: color-mix(in srgb, var(--color-candle) 40%, var(--color-paper));
+}
+
+@utility stop-gilt-lit {
+  stop-color: var(--color-candle);
+}
+
+@utility stop-gilt-body {
+  stop-color: var(--color-brass);
+}
+
+@utility stop-gilt-shade {
+  stop-color: color-mix(in srgb, var(--color-oak) 75%, var(--color-brass));
+}
+
 /* Laid paper, for every paper surface: faint horizontal lines over a fine grain, both laid over whichever paper colour
    the surface has. The grain is an inline SVG `feTurbulence` filter, written into the stylesheet as a data URL: grey
    noise at half opacity, with no colour of its own.

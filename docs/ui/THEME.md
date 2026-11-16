@@ -194,6 +194,12 @@ real route a wiring ticket adds later.
 
 - **Ornaments are drawn in code:** the three balls, rules, printer's flowers, the coins, the pointing hand. Hand-written
   SVG in the tokens' colours.
+  - **Objects in the shop** (the three balls, the coins) are drawn as the objects themselves: shaded with soft
+    gradients in the tokens' colours, with a cast shadow. Never a flat icon with an outline and a dot of light.
+  - **Printed marks** (rules, printer's flowers, the pointing hand) stay flat ink, as type is.
+  - **Gilt** is one radial gradient, lit from the upper left: candle mixed with paper at the glint, then candle, then
+    brass, then oak mixed with brass in the shade (the `stop-gilt-*` utilities). The cast shadow is blurred ink, down
+    and to the right. Ironwork takes the colour of the text around it.
 - **Engravings come from open collections, in the art pass only.** Three to five, tinted to the palette, each under
   150 KB. Candidates: William Hogarth's "Gin Lane" (1751), which shows a pawnbroker's shop under its three balls; John
   Rocque's 1746 map of London; street views of the 1750s. Files come only from collections that mark them public domain
