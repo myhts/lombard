@@ -25,8 +25,8 @@ for (const route of routes) {
       const sections = await page.locator("[data-specimen]").all();
       expect(sections.length).toBeGreaterThan(0);
       await page.evaluate(() => document.fonts.ready);
-      // A picture taken sooner would show the exchange part-way through.
-      await exchangeBox(page);
+      // A picture taken sooner would show the exchange part-way through. A route without one has nothing to wait for.
+      if ((await page.locator('[data-specimen="exchange"]').count()) > 0) await exchangeBox(page);
 
       const name = route.slice(1).replaceAll("/", "-");
       // The waiting pulse is drawn at its first frame, in full ink: caught part-way, it would pass for a fainter mark.
