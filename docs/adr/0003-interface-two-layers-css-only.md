@@ -26,8 +26,8 @@ are parked in #15, and this ADR neither adds sound nor rules it out.
 - **One themed layer, with the AI's numbers set among the period pieces:** modern readouts would break the period, and
   ornament would get in the way of the numbers.
 - **A canvas or WebGL scene:** the shop is shown as documents, not scenery, and documents need no drawing surface.
-- **An animation library:** each effect plays once, on a game event, and only the candle and one waiting pulse loop. CSS
-  transitions and keyframes cover that.
+- **An animation library:** each effect plays once, on a game event, and only the candle, one waiting pulse and the
+  writing nib loop. CSS transitions and keyframes cover that.
 - **Image files for textures:** laid paper, oak and baize come from gradients and an inline SVG noise filter. The only
   image files are the few engravings of the art pass.
 

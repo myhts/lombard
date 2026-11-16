@@ -210,10 +210,10 @@
 }
 
 /* The writing nib: the ink caret, making small pen strokes beside the saying that stands in the dialogue while the
-   customer waits (`InkCaret` with `writing`). The strokes run along the line and back, --slow each way, with the nib
-   leaning into each one about its point. The margin is the room the strokes take, so the moving nib never reaches
-   the words beside it. A reader who asks for reduced motion gets the nib still, at rest. At the end of a streaming
-   line the ink caret doesn't use this, and never moves. */
+   customer waits (`InkCaret` with `writing`). The strokes run along the line and back, a round trip of twice --slow,
+   with the nib leaning into each one about its point. The margin is the room the strokes take, so the moving nib never
+   reaches the words beside it. A reader who asks for reduced motion gets the nib still, at rest. At the end of a
+   streaming line the ink caret doesn't use this, and never moves. */
 @utility ink-caret-writing {
   flex: none;
   margin-right: 0.75rem;

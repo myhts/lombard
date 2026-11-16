@@ -95,7 +95,7 @@ opacity the waiting pulse's mark fades to).
 | Pressed type | A very light text shadow so the ink looks pressed into the paper | Display type only, never body text | Never |
 | Oak and baize | Layered gradients for grain and cloth | The page background and the counter | Never |
 | Candlelight | One fixed overlay: a warm radial gradient whose opacity and position drift on a slow, irregular keyframe loop, with a dark vignette at the edges | The period layer's page | Reduced motion, plain mode, and whenever the instrument panel is open over it |
-| Ink caret | A small nib-shaped mark. At the end of the text while it streams it rests, and never blinks. While we wait for the pawnbroker's answer it writes instead: one shared keyframe loop of small pen strokes along the line and back, `--slow` each way | At rest: the end of the pawnbroker's current line. Writing: beside the waiting saying | At rest: when the stream ends. Writing: when his words arrive. Reduced motion and plain mode: the writing nib stays, still |
+| Ink caret | A small nib-shaped mark. At the end of the text while it streams it rests, and never blinks. While we wait for the pawnbroker's answer it writes instead: one shared keyframe loop of small pen strokes along the line and back, a round trip of twice `--slow` | At rest: the end of the pawnbroker's current line. Writing: beside the waiting saying | At rest: when the stream ends. Writing: when his words arrive. Reduced motion and plain mode: the writing nib stays, still |
 | Waiting saying | A saying of the period from the copy file: the writing nib, the words in soft italic, then the source in small capitals. It never carries the Pawnbroker's name. One shows at a time, and the words never fade | In the dialogue, where the pawnbroker's answer will appear, while the customer waits for it | When his words arrive and take its place |
 | Waiting pulse | One shared keyframe loop that fades a small round ink dot to `--pulse-faint` and back, `--slow` each way; the words beside it never fade | Beside the current stage direction while its tool runs; beside the composer's button while it is sending | Reduced motion and plain mode: the dot stays, still and at full ink |
 
@@ -143,12 +143,16 @@ specimen sheet shows a piece frozen in a state. The real hover applies only on a
     whole line is set in from the margin behind a hairline rule in soft ink. Wax red and Prussian blue stay reserved,
     as the colour table says.
 - **The saying while we wait.** While the customer waits for the pawnbroker's answer, a saying stands where the answer
-  will appear: the writing nib, the words in soft italic, then the source in small capitals, kept on one line. It never
-  carries the Pawnbroker's name, so it can't be taken for his answer. His words replace it when they arrive, and the
-  nib comes to rest at the end of his line.
-  - **The caller changes it.** `Dialogue` holds no state: a line names the saying by its place in the copy file's
-    list, and past the last the list starts again, so a caller can count up. One saying shows at a time and changes
-    every five seconds. The five seconds are the caller's, so no piece in `src/ui/` holds them.
+  will appear: the writing nib, the words in soft italic, then the source in small capitals. The words may run on to a
+  second line; the source is never broken across lines. It never carries the Pawnbroker's name, so it can't be taken for
+  his answer. His words replace it when they arrive, and the nib comes to rest at the end of his line.
+  - **The caller changes it.** `Dialogue` holds no state: a line names the saying by its place in the copy file's list,
+    and past the last the list starts again, so a caller can count up. One saying shows at a time and changes every five
+    seconds. The five seconds are the caller's, so no piece in `src/ui/` holds them. They will be a duration token: the
+    ticket that wires the real caller adds it to `src/ui/theme.css` and reads it from there, so rule 3 holds. No token
+    is added now, because nothing in `src/ui/` uses it.
+  - **One saying stays when motion is off.** Under reduced motion and in plain mode, the saying shown at the start of
+    the wait stays until the answer arrives.
   - **Screen readers.** The saying is decoration and is hidden from assistive technology. The log is busy while it
     stands, and the composer's status already says "Sending".
   - **Where the sayings came from.** The copy file holds eleven, checked against printed sources on 2026-11-16:
@@ -194,7 +198,7 @@ without a reason.
 | `search_records` is running | Stage direction: "He turns the pages of the Proceedings." | until it returns |
 | `appraise` is running | "He weighs it in his hand and reckons." | until it returns |
 | `check_notices` is running | "He looks over the notices by the door." | until it returns |
-| The pawnbroker is thinking | A saying of the period stands where his answer will appear, with the nib writing beside it; a new saying every five seconds | until his words arrive |
+| The customer waits for the pawnbroker's answer | A saying of the period stands where his answer will appear, with the nib writing beside it; a new saying every five seconds | until his words arrive |
 | The pawnbroker speaks | Text streams in with the ink caret, in place of the saying | as it arrives |
 | A claim cites a trial | Its clipping slides into the evidence tray; the mark and the clipping are linked | 300ms |
 | A notice matches | The handbill drops in at a slight angle, marked in wax red | 300ms |
