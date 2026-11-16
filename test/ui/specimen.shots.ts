@@ -8,9 +8,10 @@ const widths = [360, 1280];
 // Every route that holds specimen sections. A ticket that adds a demo route lists it here.
 const routes = ["/specimen"];
 
-// The made-up exchange plays from a timer, and its text box opens only when it has played out. That takes about 15
-// seconds, because it waits with a saying before each of the pawnbroker's lines. Every test here waits for it, and the
-// pictures come after, so each test gets twice Playwright's usual 30 seconds.
+// The made-up exchange plays from a timer, and its text box opens only when it has played out. That takes about 19
+// seconds, because it waits with a saying before each of the pawnbroker's lines, and the second wait is long enough for
+// the saying to change. Every test here waits for it, and the pictures come after, so each test gets twice Playwright's
+// usual 30 seconds.
 test.describe.configure({ timeout: 60_000 });
 
 async function exchangeBox(page: Page) {

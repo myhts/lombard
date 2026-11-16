@@ -168,8 +168,10 @@ specimen sheet shows a piece frozen in a state. The real hover applies only on a
   - The turns left read "3 turns left", "1 turn left", "No turns left".
 - **The specimen player.** How fast the specimen sheet's made-up exchange plays is demo data in `src/app/specimen/`,
   not a theme timing, and no piece in `src/ui/` holds a duration (rule 3). It waits with a saying before each of the
-  pawnbroker's lines, a different one each time, for about three and a half seconds: long enough to read one, and
-  shorter than the five seconds a real wait gives each saying.
+  pawnbroker's lines, starting from a different one each time. The first wait is about three and a half seconds: long
+  enough to read one saying, and over before it would change. The second is about seven and a half, so the saying is
+  seen to change once, after five seconds. For a reader who asks for reduced motion, the first saying of a wait stays
+  until the answer arrives.
 
 **Instrument pieces:**
 
