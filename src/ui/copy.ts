@@ -1,6 +1,7 @@
 // Every string the interface shows lives here (docs/ui/THEME.md, rule 6): components read their words from this file or
 // take them as props. The sample text is invented. None of it comes from the Old Bailey data, and none uses the long s.
 export const copy = {
+  shopSign: { closed: "Closed" },
   specimen: {
     title: "Specimen Sheet",
     madeUpData: "Specimen: made-up data.",
@@ -18,6 +19,15 @@ export const copy = {
       instrument: { face: "System monospace", sample: "search_records  3 hits  212 ms" },
       sizes: { heading: "The Sizes", sample: "A silver watch" },
     },
+    sheet: {
+      heading: "The Sheet",
+      plain: "Plain",
+      aged: "Aged",
+      lifted: "Lifted",
+      sample: "Laid paper under pressed display type. This line is body text, and is not pressed.",
+    },
+    rule: { heading: "Rules and Flowers", thin: "Thin", double: "Double", flower: "With flower", fleuron: "Fleuron" },
+    shopSign: { heading: "The Shop Sign", open: "Open", closed: "Closed", name: "The Three Balls" },
     money: {
       heading: "Money",
       inline: "Inline",

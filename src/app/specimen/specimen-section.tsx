@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 export function SpecimenSection({ id, heading, children }: { id: string; heading: string; children: ReactNode }) {
   return (
     <section data-specimen={id} className="mt-10">
-      <h2 className="font-display-sc text-xl">{heading}</h2>
+      <h2 className="type-pressed font-display-sc text-xl">{heading}</h2>
       {children}
     </section>
   );
