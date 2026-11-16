@@ -4,15 +4,21 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 // The four period families of the brief's type table, declared once, here. next/font downloads them at build time and
-// serves them from this app, so no visitor's browser calls Google. Latin only, and only the weights used. Each sets a
-// --face-* variable, which the theme stylesheet turns into its --font-* token (src/ui/theme.css).
+// serves them from this app, so no visitor's browser calls Google. Latin only, and only the weights and styles used:
+// the display face's italic is there for the Customer's name in the dialogue. Each sets a --face-* variable, which the
+// theme stylesheet turns into its --font-* token (src/ui/theme.css).
 const text = Libre_Caslon_Text({
   subsets: ["latin"],
   weight: "400",
   style: ["normal", "italic"],
   variable: "--face-text",
 });
-const display = IM_Fell_English({ subsets: ["latin"], weight: "400", variable: "--face-display" });
+const display = IM_Fell_English({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--face-display",
+});
 const displaySc = IM_Fell_English_SC({ subsets: ["latin"], weight: "400", variable: "--face-display-sc" });
 const hand = Pinyon_Script({ subsets: ["latin"], weight: "400", variable: "--face-hand" });
 
