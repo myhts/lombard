@@ -69,13 +69,13 @@ lines are also cheap to build well in CSS, need almost no images and stay readab
 | Token | Face | Why this face | Used for |
 |---|---|---|---|
 | `--font-text` | Libre Caslon Text | William Caslon's types were the standard English book face of the 1750s | All running text, the dialogue, clippings |
-| `--font-display` | IM Fell English | A digitised set of old English printing types with the rough edges of hand-set print | Mastheads, document headings, the shop sign |
-| `--font-display-sc` | IM Fell English SC | The same types' small capitals, which Google Fonts serves as a family of its own | Speakers' names in the dialogue, headings set in small capitals |
+| `--font-display` | IM Fell English | A digitised set of old English printing types with the rough edges of hand-set print | Mastheads, document headings, the shop sign. Its italic: the Customer's name in the dialogue |
+| `--font-display-sc` | IM Fell English SC | The same types' small capitals, which Google Fonts serves as a family of its own | The Pawnbroker's name in the dialogue, the source printed after a waiting saying, headings set in small capitals |
 | `--font-hand` | Pinyon Script | An English round hand, the business handwriting of the century | The pawn ticket's number, signatures. Never more than a few words |
 | `--font-instrument` | The system monospace stack | Free, instant and plainly modern | The whole instrument layer |
 
-Each family loads at build time with only the Latin subset and the weights used. If one isn't available that way, the
-implementer picks the nearest from the same tradition and records it in the brief.
+Each family loads at build time with only the Latin subset and the weights and styles used. If one isn't available that
+way, the implementer picks the nearest from the same tradition and records it in the brief.
 
 **Other tokens:** a type scale of six sizes, written in rem: `--text-sm` (14px), `--text-base` (17px, body text),
 `--text-lg` (20px), `--text-xl` (24px), `--text-2xl` (32px) and `--text-3xl` (40px), the three largest with their own
@@ -95,11 +95,13 @@ opacity the waiting pulse's mark fades to).
 | Pressed type | A very light text shadow so the ink looks pressed into the paper | Display type only, never body text | Never |
 | Oak and baize | Layered gradients for grain and cloth | The page background and the counter | Never |
 | Candlelight | One fixed overlay: a warm radial gradient whose opacity and position drift on a slow, irregular keyframe loop, with a dark vignette at the edges | The period layer's page | Reduced motion, plain mode, and whenever the instrument panel is open over it |
-| Ink caret | A small nib-shaped mark at the end of the text while it streams. It never blinks | The pawnbroker's current line | When the stream ends |
+| Ink caret | A small nib-shaped mark. At the end of the text while it streams it rests, and never blinks. While we wait for the pawnbroker's answer it writes instead: one shared keyframe loop of small pen strokes along the line and back, `--slow` each way | At rest: the end of the pawnbroker's current line. Writing: beside the waiting saying | At rest: when the stream ends. Writing: when his words arrive. Reduced motion and plain mode: the writing nib stays, still |
+| Waiting saying | A saying of the period from the copy file: the writing nib, the words in soft italic, then the source in small capitals. It never carries the Pawnbroker's name. One shows at a time, and the words never fade | In the dialogue, where the pawnbroker's answer will appear, while the customer waits for it | When his words arrive and take its place |
 | Waiting pulse | One shared keyframe loop that fades a small round ink dot to `--pulse-faint` and back, `--slow` each way; the words beside it never fade | Beside the current stage direction while its tool runs; beside the composer's button while it is sending | Reduced motion and plain mode: the dot stays, still and at full ink |
 
-Only the candle and one waiting pulse ever loop. Everything else plays once. The waiting pulse is one shared animation:
-it shows on the current stage direction while its tool runs, and on the composer while it is sending.
+Only the candle, one waiting pulse and the writing nib ever loop. Everything else plays once. The waiting pulse is one
+shared animation: it shows on the current stage direction while its tool runs, and on the composer while it is sending.
+The writing nib is one shared animation too, and shows only beside the waiting saying.
 
 **Plain mode,** labelled "Snuff the candle": one switch that removes the candle, the vignette and every animation, and
 sets the page to flat paper on a flat dark background. It is remembered in the browser. It is the accessibility fallback
@@ -112,7 +114,7 @@ and the fix when a phone struggles.
 | `Sheet` | A sheet of paper lying on the counter | Any content; the base for most others | plain, aged, lifted |
 | `Rule`, `Fleuron` | A printer's rule and a printer's flower, as hand-coded SVG | Dividers and ornaments | thin, double, with flower |
 | `ShopSign` | The pawnbroker's three gilt balls hanging from a wrought-iron bar | The shop's name | open, closed |
-| `Dialogue` | A printed dialogue, set like the question-and-answer text of the Proceedings: the speaker's name in small capitals, then the words | The conversation. No chat bubbles | pawnbroker line, customer line, streaming, stage direction |
+| `Dialogue` | A printed dialogue, set like the question-and-answer text of the Proceedings: the speaker's name, then the words | The conversation. No chat bubbles | pawnbroker line, customer line, streaming, waiting with a saying, stage direction |
 | `StageDirection` | An italic aside | What the pawnbroker is doing while a tool runs | one per tool |
 | `Composer` | The space where the customer speaks | A text box, a "Say it" button, the turns left | idle, sending, disabled, visit over |
 | `ItemCard` | A slip describing the goods laid on the counter | The item's description | — |
@@ -133,9 +135,29 @@ specimen sheet shows a piece frozen in a state. The real hover applies only on a
 
 **The dialogue** (settled in #19).
 
-- **Speakers.** The two names are "Pawnbroker" and "Customer", from the copy file. A line is the name in small capitals
-  and a full stop, then the words. The dialogue is a log named "The conversation", and is marked busy while a line
-  streams.
+- **Speakers.** The two names are "Pawnbroker" and "Customer", from the copy file. A line is the name and a full stop,
+  then the words. The dialogue is a log named "The conversation", and is marked busy while a line streams or a saying
+  stands.
+  - **Two cues, and no colour, tell them apart.** The Pawnbroker's name is in small capitals and his line is flush
+    left. The Customer's name is in the display face's italic, at `--text-lg` because the face runs small, and the
+    whole line is set in from the margin behind a hairline rule in soft ink. Wax red and Prussian blue stay reserved,
+    as the colour table says.
+- **The saying while we wait.** While the customer waits for the pawnbroker's answer, a saying stands where the answer
+  will appear: the writing nib, the words in soft italic, then the source in small capitals, kept on one line. It never
+  carries the Pawnbroker's name, so it can't be taken for his answer. His words replace it when they arrive, and the
+  nib comes to rest at the end of his line.
+  - **The caller changes it.** `Dialogue` holds no state: a line names the saying by its place in the copy file's
+    list, and past the last the list starts again, so a caller can count up. One saying shows at a time and changes
+    every five seconds. The five seconds are the caller's, so no piece in `src/ui/` holds them.
+  - **Screen readers.** The saying is decoration and is hidden from assistive technology. The log is busy while it
+    stands, and the composer's status already says "Sending".
+  - **Where the sayings came from.** The copy file holds eleven, checked against printed sources on 2026-11-16:
+    proverbs from Fuller's _Gnomologia_ (1732) and Ray's _English Proverbs_ (1737), two lines of Shakespeare from the
+    Folger edition (_Hamlet_ and _The Merchant of Venice_), and Proverbs 22:7 from the King James Bible. The words are
+    the source's, in modern spelling and capitals. All are long out of copyright, and none comes from the Old Bailey
+    data. A saying belongs in the list only if a London shop of 1753 could have known it: four whose wording was
+    confirmed were left out, because by then they were in print only in Philadelphia, or reached London print only in
+    1758 (#19 names them).
 - **Stage directions.** One line to each tool, keyed by the tool's name in the copy file. The line stays when its tool
   returns; only the waiting pulse beside it goes.
 - **The composer.** The text box is two rows, dressed like `Field` and labelled "What do you say?". Enter sends and
@@ -145,7 +167,9 @@ specimen sheet shows a piece frozen in a state. The real hover applies only on a
     "The visit is over." stands in place of the turns left.
   - The turns left read "3 turns left", "1 turn left", "No turns left".
 - **The specimen player.** How fast the specimen sheet's made-up exchange plays is demo data in `src/app/specimen/`,
-  not a theme timing, and no piece in `src/ui/` holds a duration (rule 3).
+  not a theme timing, and no piece in `src/ui/` holds a duration (rule 3). It waits with a saying before each of the
+  pawnbroker's lines, a different one each time, for about three and a half seconds: long enough to read one, and
+  shorter than the five seconds a real wait gives each saying.
 
 **Instrument pieces:**
 
@@ -168,7 +192,8 @@ without a reason.
 | `search_records` is running | Stage direction: "He turns the pages of the Proceedings." | until it returns |
 | `appraise` is running | "He weighs it in his hand and reckons." | until it returns |
 | `check_notices` is running | "He looks over the notices by the door." | until it returns |
-| The pawnbroker speaks | Text streams in with the ink caret | as it arrives |
+| The pawnbroker is thinking | A saying of the period stands where his answer will appear, with the nib writing beside it; a new saying every five seconds | until his words arrive |
+| The pawnbroker speaks | Text streams in with the ink caret, in place of the saying | as it arrives |
 | A claim cites a trial | Its clipping slides into the evidence tray; the mark and the clipping are linked | 300ms |
 | A notice matches | The handbill drops in at a slight angle, marked in wax red | 300ms |
 | A loan is offered | An offer slip is written out | 300ms |
