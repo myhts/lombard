@@ -12,7 +12,7 @@ export type ComposerState = "idle" | "sending" | "disabled" | "over";
 // The space where the customer speaks: a text box, the "Say it" button and the turns left. Enter sends, and Shift+Enter
 // starts a new line. A blank line isn't sent. After sending, the box is cleared and keeps the focus, and it can be
 // written in while the last line is still sending. `onSay` is optional, so a server component can show a composer in
-// any state without a handler.
+// any state without a handler; such a composer sends nothing, and keeps what is typed in it.
 export function Composer({
   state,
   turnsLeft,
@@ -30,8 +30,9 @@ export function Composer({
   function say(event: SyntheticEvent) {
     event.preventDefault();
     const line = box.current?.value.trim();
-    if (state !== "idle" || !box.current || !line) return;
-    onSay?.(line);
+    // With no handler the line would go nowhere, so it stays in the box.
+    if (state !== "idle" || !box.current || !line || !onSay) return;
+    onSay(line);
     box.current.value = "";
     // A click on the button took the focus from the box.
     box.current.focus();

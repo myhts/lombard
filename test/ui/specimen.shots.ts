@@ -67,3 +67,19 @@ test("a line is written and sent by keyboard alone", async ({ page }) => {
   await expect(box).toHaveValue("");
   await expect(box).toBeFocused();
 });
+
+test("a line with no handler to take it stays in the box", async ({ page }) => {
+  await page.goto("/specimen");
+  // Until the page's script runs, Enter is the browser's and only starts a new line. The exchange can't play out
+  // without that script, so its open box shows the composers are live.
+  await exchangeBox(page);
+  // The composer section's samples have no handler. Of the four, only the idle one has its button open.
+  const idle = page
+    .locator('[data-specimen="composer"] form')
+    .filter({ has: page.getByRole("button", { name: "Say it", disabled: false }) });
+  const box = idle.getByRole("textbox", { name: "What do you say?" });
+
+  await box.fill("I shall take it elsewhere.");
+  await box.press("Enter");
+  await expect(box).toHaveValue("I shall take it elsewhere.");
+});
