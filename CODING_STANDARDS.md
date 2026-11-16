@@ -26,6 +26,12 @@ Tests exercise the module through its public interface, at the seams agreed for 
 through the same interface. When a test needs a setup function that doesn't exist, add it to the module rather than
 writing rows or fields directly.
 
+## A fix leaves existing tests alone
+
+An existing test's expected value changes only when the ticket changes that behaviour, and the PR names the line of
+the ticket that asks for it. A test deleted, skipped or loosened so that a run goes green is a must-fix: the code
+changes, or the failing test goes to the owner as a finding.
+
 ## Failures are visible
 
 Nothing is swallowed. An error at a boundary becomes a clear, typed response for the caller, and the original cause is
@@ -43,6 +49,9 @@ kept.
   (ADR 0001).
 - **Model calls go through `engine/`.** Code outside it never builds a Claude or Voyage client: the wrapper logs the
   cost, and tests swap it for the HTTP model fake.
+- **The model fake copies the real API.** Every response the fake serves is typed with the SDK's own response type,
+  with no cast, and its shape starts from a real response or the installed SDK's type declarations, never from
+  memory. The fake and the client are written together, so a field invented in one passes in the other.
 - **Limits live in code, not prompts.** A rule the pawnbroker must obey (a loan limit, what a customer may see) is
   checked in the tool or the database, and a test proves it holds whatever the model says.
 - **Server and client stay apart.** Secrets, the database and model clients are imported only from server code in
