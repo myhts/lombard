@@ -77,6 +77,9 @@
   --stamp: 250ms;
   --slow: 600ms;
   --beat: 80ms;
+
+  /* How faint the waiting pulse's mark gets before it comes back: an opacity. */
+  --pulse-faint: 0.2;
 }
 
 /* The faces. The root layout loads the four period families with next/font, which sets the --face-* variables on
@@ -181,6 +184,28 @@
   text-shadow:
     0 1px 0 rgb(255 255 255 / 0.6),
     0 -0.5px 0.5px color-mix(in srgb, var(--color-ink) 22%, transparent);
+}
+
+/* The waiting pulse: a small round ink dot that fades to --pulse-faint and back, --slow each way, beside a stage
+   direction while its tool runs and beside the composer's button while it sends. It is the only loop besides the
+   candle (the brief's "Texture and light"), so the mark, its keyframes and its timing are all here, once. A reader who
+   asks for reduced motion gets the dot still, at full ink. Its size is in em, so it follows the words beside it. */
+@utility waiting-pulse {
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  border-radius: 50%;
+  background-color: var(--color-ink);
+  vertical-align: 0.1em;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: waiting-pulse var(--slow) ease-in-out infinite alternate;
+  }
+}
+
+@keyframes waiting-pulse {
+  to {
+    opacity: var(--pulse-faint);
+  }
 }
 
 /* One column of `Money`'s ledger form: wide enough for `19s` or `11d`, so the units of every row line up. It lives here

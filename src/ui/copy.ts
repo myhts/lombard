@@ -2,6 +2,15 @@
 // take them as props. The sample text is invented. None of it comes from the Old Bailey data, and none uses the long s.
 export const copy = {
   shopSign: { closed: "Closed" },
+  // The speakers' names, as the dialogue sets them before each line.
+  speakers: { pawnbroker: "Pawnbroker", customer: "Customer" },
+  // What the pawnbroker is seen to do while a tool runs, keyed by the tool's name: a new tool gets its line by adding
+  // one entry here (the event table in docs/ui/THEME.md).
+  stageDirections: {
+    search_records: "He turns the pages of the Proceedings.",
+    appraise: "He weighs it in his hand and reckons.",
+    check_notices: "He looks over the notices by the door.",
+  },
   specimen: {
     title: "Specimen Sheet",
     madeUpData: "Specimen: made-up data.",
