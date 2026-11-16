@@ -4,6 +4,8 @@ export const copy = {
   shopSign: { closed: "Closed" },
   // The speakers' names, as the dialogue sets them before each line.
   speakers: { pawnbroker: "Pawnbroker", customer: "Customer" },
+  // The dialogue's accessible name.
+  dialogue: { label: "The conversation" },
   // What the pawnbroker is seen to do while a tool runs, keyed by the tool's name: a new tool gets its line by adding
   // one entry here (the event table in docs/ui/THEME.md).
   stageDirections: {
