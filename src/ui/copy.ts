@@ -18,6 +18,7 @@ export const copy = {
   // spelling and capitals: Fuller's Gnomologia (1732) and Ray's English Proverbs (1737) for the proverbs, the Folger
   // Shakespeare for the two plays, and the King James Bible for the last. All are long out of copyright, and none
   // comes from the Old Bailey data.
+  // The longest saying stays last: the specimen sheet shows the last one, to show how a saying wraps on a phone.
   sayings: [
     { words: "Neither a borrower nor a lender be.", source: "Hamlet" },
     { words: "All that glisters is not gold.", source: "The Merchant of Venice" },

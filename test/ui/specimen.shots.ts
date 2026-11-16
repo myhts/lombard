@@ -33,7 +33,8 @@ for (const route of routes) {
       if ((await page.locator('[data-specimen="exchange"]').count()) > 0) await exchangeBox(page);
 
       const name = route.slice(1).replaceAll("/", "-");
-      // The waiting pulse is drawn at its first frame, in full ink: caught part-way, it would pass for a fainter mark.
+      // The waiting pulse and the writing nib are drawn at their first frames, the dot in full ink and the nib at rest:
+      // caught part-way, the dot would pass for a fainter mark and the nib for one set askew.
       const still = { animations: "disabled" } as const;
       // The whole page first, so the frame around the sections can be judged too.
       await page.screenshot({ path: `.ui-shots/${name}-page-${width}.png`, fullPage: true, ...still });

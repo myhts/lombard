@@ -22,7 +22,7 @@ const setting = {
 
 // The saying shown while we wait: the writing nib, the words in soft italic, then the source in small capitals. It
 // never carries the Pawnbroker's name, so it can't be taken for his answer. It is decoration, so the whole line is
-// hidden from assistive technology; the log is busy meanwhile, and the composer's status says "Sending".
+// hidden from assistive technology; the log is busy while it stands, and the caller's composer is sending meanwhile.
 function WaitingSaying({ place }: { place: number }) {
   // Only a whole number, zero or more, finds a saying. Anything else is a fault in the caller's counting, and showing
   // some saying anyway would hide it. The place is checked before the list is read, because a negative multiple of the

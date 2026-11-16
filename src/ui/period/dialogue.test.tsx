@@ -54,8 +54,9 @@ describe("Dialogue", () => {
     const waiting = renderToStaticMarkup(<Dialogue lines={[{ saying: 4 }]} />);
     const answered = renderToStaticMarkup(<Dialogue lines={[{ speaker: "pawnbroker", words: "Let me see it." }]} />);
 
-    // The nib, the words and the source are one hidden line: with it taken out, the log holds no text at all.
-    const hiddenLine = /<p [^>]*aria-hidden="true".*<\/p>/;
+    // The nib, the words and the source are one hidden line, whatever its tag: with it taken out, the log holds no text
+    // at all.
+    const hiddenLine = /<(\w+) [^>]*aria-hidden="true".*<\/\1>/;
     expect(waiting).toMatch(hiddenLine);
     expect(textOf(waiting)).toBe("Honesty is the best policy. Proverb");
     expect(textOf(waiting.replace(hiddenLine, ""))).toBe("");
