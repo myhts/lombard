@@ -154,7 +154,8 @@ specimen sheet shows a piece frozen in a state. The real hover applies only on a
   - **One saying stays when motion is off.** Under reduced motion and in plain mode, the saying shown at the start of
     the wait stays until the answer arrives.
   - **Screen readers.** The saying is decoration and is hidden from assistive technology. The log is busy while it
-    stands, and the composer's status already says "Sending".
+    stands. The composer's status says "Sending" only while its caller holds it in the sending state: `Dialogue` doesn't
+    set that, so the caller does for the length of the wait.
   - **Where the sayings came from.** The copy file holds eleven, checked against printed sources on 2026-11-16:
     proverbs from Fuller's _Gnomologia_ (1732) and Ray's _English Proverbs_ (1737), two lines of Shakespeare from the
     Folger edition (_Hamlet_ and _The Merchant of Venice_), and Proverbs 22:7 from the King James Bible. The words are
