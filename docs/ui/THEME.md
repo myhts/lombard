@@ -126,6 +126,10 @@ and the fix when a phone struggles.
 | `Broadside` | A large printed sheet for news | The visit's outcome and score; the constable being called; the shop closed | accepted, refused, constable, closed |
 | `Button`, `Field`, `Switch` | — | Plain controls dressed in ink and paper | default, hover, focus, disabled |
 
+**Hover and focus.** A piece's hover and focus styles use the theme's `hovered:` and `focused:` variants, never
+Tailwind's `hover:` and `focus-visible:`. Each also matches `data-forced-state="hover"` or `"focus"`, which is how the
+specimen sheet shows a piece frozen in a state. The real hover applies only on a device that can hover.
+
 **Instrument pieces:**
 
 | Piece | Shows | States |
