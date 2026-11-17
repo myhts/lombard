@@ -4,7 +4,8 @@ import path from "node:path";
 // The theme stylesheet's tokens by name, in the order written. The specimen sheet and the contrast check both read
 // them here, so the stylesheet stays the tokens' one source (docs/ui/THEME.md, rule 3).
 export function readThemeTokens(): ReadonlyMap<string, string> {
-  // Found from the working directory, which is the repo root for Next and for Vitest. A path built from
+  // Found from the working directory, which is the repo root for `next build` and for Vitest but may not be for a
+  // running server, so a route that calls this must be static (docs/ui/THEME.md, rule 12). A path built from
   // import.meta.url wouldn't survive Next's bundling.
   const stylesheet = readFileSync(path.join(process.cwd(), "src/ui/theme.css"), "utf8");
   const withoutComments = stylesheet.replace(/\/\*[\s\S]*?\*\//g, "");

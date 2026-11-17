@@ -35,8 +35,10 @@ saw and did ([ADR 0003](../adr/0003-interface-two-layers-css-only.md)).
 11. **Look at your own work.** Before opening a PR, the implementer opens each changed screen in a browser at 360px and
     1280px, fixes what looks wrong, and runs the screenshot command so the pictures and the browser checks are there for
     the owner.
-12. **Specimen routes are static.** The tokens are read from the stylesheet at build time, so the build fails if a route
-    under `/specimen` reads a request-time value, and a route there declares no `dynamic` or `revalidate` of its own.
+12. **Specimen routes are static.** The tokens are read from the stylesheet at build time. `src/app/specimen/layout.tsx`
+    makes the build fail if `/specimen` or a route under it reads a request-time value. A route there declares no
+    `dynamic` or `revalidate` of its own. One with a dynamic segment exports `generateStaticParams` and
+    `dynamicParams = false`: otherwise the build passes and the page renders on the server at its first request.
 
 ## Design reference
 
