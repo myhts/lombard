@@ -2,20 +2,36 @@ import { once } from "node:events";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { text } from "node:stream/consumers";
 import type { Message, StopReason } from "@anthropic-ai/sdk/resources/messages";
+import type { ErrorResponse, ErrorType } from "@anthropic-ai/sdk/resources/shared";
 import { z } from "zod";
 
 export type ScriptedUsage = { input: number; output: number; cacheRead: number; write5m: number; write1h: number };
-// Tagged by `kind`, so error, retryable and dropped-socket replies can join as further members.
-export type ScriptedReply = { kind: "success"; usage: ScriptedUsage; stopReason?: StopReason };
-/** A real HTTP server standing in for the Claude Messages API; each test scripts its replies in order. */
-export async function startModelFake() {
+// Tagged by `kind`: a success, an API error (`retryable` lets the SDK retry it), or a connection dropped unanswered.
+export type ScriptedReply =
+  | { kind: "success"; usage: ScriptedUsage; stopReason?: StopReason }
+  | { kind: "error"; status: number; errorType: ErrorType; retryable?: boolean }
+  | { kind: "drop" };
+/** A real HTTP server standing in for the Claude Messages API; each test scripts its replies in order.
+ * `onRequest` runs as each request arrives, before its reply: a test can advance a fake clock with it. */
+export async function startModelFake({ onRequest }: { onRequest?: () => void } = {}) {
   const queue: ScriptedReply[] = [];
   let requests = 0;
   async function answer(req: IncomingMessage, res: ServerResponse) {
+    onRequest?.(); // inside answer(), so a hook that throws fails the request instead of the server
     if (req.method !== "POST" || req.url !== "/v1/messages") return res.writeHead(404).end();
     const { model } = z.object({ model: z.string() }).parse(JSON.parse(await text(req)));
     const reply = queue.shift();
     if (!reply) throw new Error("model fake: no reply scripted for this request");
+    if (reply.kind === "drop") return void req.socket.destroy();
+    if (reply.kind === "error") {
+      const requestId = `req_fake_${requests}`;
+      const message = `scripted ${reply.errorType}`;
+      const body: ErrorResponse = { type: "error", error: { type: reply.errorType, message }, request_id: requestId };
+      // The SDK retries 408, 409, 429 and 5xx unless `x-should-retry` says otherwise; `retry-after-ms` makes it quick.
+      const retry = reply.retryable ? { "retry-after-ms": "1" } : { "x-should-retry": "false" };
+      const headers = { "content-type": "application/json", "request-id": requestId, ...retry };
+      return res.writeHead(reply.status, headers).end(JSON.stringify(body));
+    }
     const { input, output, cacheRead, write5m, write1h } = reply.usage;
     // Fields in the order of a real response (2026-11-16). It omits `citations` and `server_tool_use`, which SDK
     // 1.3.0's types require, so they are null here.
