@@ -11,8 +11,9 @@
 type Channels = readonly [number, number, number];
 
 // Each shadow as the stylesheet writes one: `inset`, two to four lengths in px, then a #rrggbb colour. Any other form
-// is refused, not guessed at, so a shadow this can't read fails the check instead of passing it.
-const shadowForm = /^inset((?: (?:-?\d*\.?\d+px|0)){2,4}) (#[0-9a-f]{6})$/i;
+// is refused, not guessed at, so a shadow this can't read fails the check instead of passing it. The lookahead refuses
+// a minus sign on the third length, the blur: a browser drops a declaration whose blur is negative.
+const shadowForm = /^inset(?! \S+ \S+ -)((?: (?:-?\d*\.?\d+px|0)){2,4}) (#[0-9a-f]{6})$/i;
 
 function channels(colour: string): Channels {
   if (!/^#[0-9a-f]{6}$/i.test(colour)) throw new Error(`Not a #rrggbb colour: ${JSON.stringify(colour)}`);

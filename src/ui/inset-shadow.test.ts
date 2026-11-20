@@ -56,6 +56,8 @@ describe("colourUnderInsetShadows", () => {
     ["an outer shadow", "10px 0 0 0 #000000"],
     ["a colour written as rgb()", "inset 10px 0 0 0 rgb(0 0 0)"],
     ["a length in rem", "inset 1rem 0 0 0 #000000"],
+    // A browser drops a declaration whose blur is negative, so there is no shadow to work out.
+    ["a negative blur", "inset 0 0 -4px #000000"],
   ])("refuses %s", (_form, shadow) => {
     expect(() => colourUnderInsetShadows(shadow, white, box, { x: 5, y: midHeight })).toThrow(
       `Not an inset shadow in px with a #rrggbb colour: ${JSON.stringify(shadow)}`,
