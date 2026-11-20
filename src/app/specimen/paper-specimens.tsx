@@ -9,6 +9,9 @@ const { sheet, rule, shopSign } = copy.specimen;
 
 // The three sheets lie on baize, as they will on the counter, so the resting and lifted shadows can be told apart.
 // Each carries a display heading, which is pressed, and a line of body text, which is not.
+// The aged sheet ends with a line of soft ink set to the right, so its last words lie in the bottom-right corner, where
+// the aged edges are darkest. The sheet's `p-4` is the nearest a piece may set text to them (docs/ui/THEME.md, "Soft ink
+// on aged paper").
 export function SheetSpecimen() {
   return (
     <SpecimenSection id="sheet" heading={sheet.heading}>
@@ -17,6 +20,7 @@ export function SheetSpecimen() {
           <Sheet key={variant} variant={variant} className="p-4">
             <h3 className="type-pressed font-display text-2xl">{sheet[variant]}</h3>
             <p className="mt-2">{sheet.sample}</p>
+            {variant === "aged" && <p className="mt-2 text-right text-ink-soft">{sheet.softInk}</p>}
           </Sheet>
         ))}
       </div>
