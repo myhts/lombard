@@ -3,7 +3,8 @@ import { contrastRatio } from "./contrast";
 import { colourUnderInsetShadows } from "./inset-shadow";
 import { readThemeTokens } from "./theme-tokens";
 
-// Every pair in the last column of the brief's colour table (docs/ui/THEME.md): text colour, then its ground.
+// Every pair in the last column of the brief's colour table (docs/ui/THEME.md): text colour, then its ground. The one
+// entry not here is soft ink on paper-aged under the aged edges, which the second `it.each` below checks instead.
 const textPairs = [
   ["--color-ink", "--color-paper"],
   ["--color-ink", "--color-paper-aged"],
