@@ -66,10 +66,10 @@
 
   /* Aged edges: an inset shadow in paper-edge, heavier at the bottom and right so it isn't even. A shadow token, not a
      texture utility, so that Tailwind lays it under --shadow-resting or --shadow-lifted instead of replacing them. It
-     hasn't quite faded out 16px in: in the bottom-right corner, the darkest place, about a tenth of paper-edge still
-     lies over the paper there. So text on an aged sheet is set `p-4` or more from every edge, where soft ink keeps 5.2
-     to 1 (docs/ui/THEME.md, "Soft ink on aged paper"). theme.test.ts works that out from this value, so a heavier or
-     wider shadow fails there. */
+     hasn't quite faded out 16px in, least of all in the bottom-right corner, the darkest place. So text on an aged
+     sheet is set `p-4` or more from every edge, where soft ink still has the contrast rule 8 asks for (the figures are
+     in docs/ui/THEME.md, "Soft ink on aged paper"). theme.test.ts works the paper's colour there out from this value.
+     It fails once the shadow is heavy or wide enough to take soft ink under 4.5 to 1 at `p-4`. */
   --inset-shadow-aged-edges:
     inset 3px 2px 6px -2px var(--color-paper-edge), inset -5px -7px 14px -4px var(--color-paper-edge),
     inset 0 0 16px var(--color-paper-edge);
@@ -167,9 +167,10 @@
    the surface has. The grain is an inline SVG `feTurbulence` filter, written into the stylesheet as a data URL: grey
    noise at half opacity, with no colour of its own.
    The texture must not darken the paper: the contrast check takes each paper at its token's colour and leaves this
-   texture out of its sums, and soft ink on an aged sheet has the least to spare (5.2 to 1 at the nearest a piece may
-   set it to the aged edges, of the 4.5 rule 8 asks for). So each laid line is a light edge beside a dark one, and the
-   grain is blended as an overlay, which lightens as much as it darkens: the paper's average colour stays its token. */
+   texture out of its sums, and soft ink on an aged sheet has the least to spare over the 4.5 rule 8 asks for, at the
+   nearest a piece may set it to the aged edges (the figures are in docs/ui/THEME.md, "Soft ink on aged paper"). So
+   each laid line is a light edge beside a dark one, and the grain is blended as an overlay, which lightens as much as
+   it darkens: the paper's average colour stays its token. */
 @utility texture-laid {
   background-image:
     repeating-linear-gradient(
