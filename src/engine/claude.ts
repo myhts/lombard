@@ -1,6 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Anthropic, { APIError } from "@anthropic-ai/sdk";
 import type { Message, MessageCreateParamsNonStreaming, Usage } from "@anthropic-ai/sdk/resources/messages";
-import type { CallLog } from "./call-log";
+import type { CallLog, CallRecord } from "./call-log";
 import { systemClock, type Clock } from "./clock";
 import { costNanoUsd, priceFor, type TokenUsage } from "./prices";
 
@@ -29,6 +29,14 @@ function toTokenUsage(usage: Usage): TokenUsage {
   };
 }
 
+const NO_TOKENS: TokenUsage = { input: 0, output: 0, cacheRead: 0, write5m: 0, write1h: 0 };
+
+// The API's error type (e.g. `rate_limit_error`) when there is one, else the error's class (`APIConnectionError`).
+function errorTypeOf(error: unknown): string {
+  if (error instanceof APIError && error.type) return error.type;
+  return error instanceof Error ? error.constructor.name : typeof error;
+}
+
 export type ClaudeWrapperDeps = { client: Anthropic; callLog: CallLog; clock?: Clock };
 
 /** Sends Claude messages through the cost meter: one call-log record per call, written after the SDK's retries. */
@@ -38,26 +46,33 @@ export function createClaudeWrapper({ client, callLog, clock = systemClock }: Cl
       const price = priceFor(params.model);
       if (!price) throw new UnpricedModelError(params.model);
       const started = clock.now();
-      const { data: message, request_id } = await client.messages.create(params).withResponse();
-      const latencyMs = Math.round(clock.now() - started); // performance.now() has fractions of a millisecond
-      const usage = toTokenUsage(message.usage);
-      await callLog.record({
-        provider: "anthropic",
-        model: params.model,
-        operation: "messages",
-        purpose,
-        inputTokens: usage.input,
-        outputTokens: usage.output,
-        cacheReadTokens: usage.cacheRead,
-        cacheWrite5mTokens: usage.write5m,
-        cacheWrite1hTokens: usage.write1h,
-        totalTokens: null, // Claude reports no total
-        costNanoUsd: costNanoUsd(price, usage),
-        latencyMs,
-        status: "ok",
-        errorType: null,
-        requestId: request_id ?? null,
-      });
+      const record = (usage: TokenUsage, outcome: Pick<CallRecord, "status" | "errorType" | "requestId">) =>
+        callLog.record({
+          provider: "anthropic",
+          model: params.model,
+          operation: "messages",
+          purpose,
+          inputTokens: usage.input,
+          outputTokens: usage.output,
+          cacheReadTokens: usage.cacheRead,
+          cacheWrite5mTokens: usage.write5m,
+          cacheWrite1hTokens: usage.write1h,
+          totalTokens: null, // Claude reports no total
+          costNanoUsd: costNanoUsd(price, usage),
+          latencyMs: Math.round(clock.now() - started), // performance.now() has fractions of a millisecond
+          ...outcome,
+        });
+      let response;
+      try {
+        response = await client.messages.create(params).withResponse();
+      } catch (error) {
+        // Recorded after the SDK's last retry, with zero tokens; the caller still gets the SDK's own error.
+        const requestId = error instanceof APIError ? (error.requestID ?? null) : null;
+        await record(NO_TOKENS, { status: "error", errorType: errorTypeOf(error), requestId });
+        throw error;
+      }
+      const { data: message, request_id } = response;
+      await record(toTokenUsage(message.usage), { status: "ok", errorType: null, requestId: request_id ?? null });
       return message;
     },
   };

@@ -1,8 +1,9 @@
 import type { MessageCreateParamsNonStreaming } from "@anthropic-ai/sdk/resources/messages";
+import { BadRequestError } from "@anthropic-ai/sdk";
 import { afterEach, describe, expect, it } from "vitest";
 import { InMemoryCallLog } from "@/engine/call-log";
 import { createAnthropicClient, createClaudeWrapper, UnpricedModelError } from "@/engine/claude";
-import { startModelFake } from "../model-fake";
+import { startModelFake, type ScriptedReply } from "../model-fake";
 
 // Each test's fake, closed after it.
 const closers: (() => Promise<void>)[] = [];
@@ -85,5 +86,37 @@ describe("the Claude wrapper", () => {
     await expect(sending).rejects.toThrow(new UnpricedModelError("claude-unpriced-0"));
     expect(fake.requestCount()).toBe(0);
     expect(callLog.calls).toEqual([]);
+  });
+
+  // A failed call records no tokens and no cost; the cases differ in the error and the requests it took.
+  const failed = {
+    provider: "anthropic",
+    model: "claude-haiku-5-5",
+    operation: "messages",
+    purpose: "test.error",
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheReadTokens: 0,
+    cacheWrite5mTokens: 0,
+    cacheWrite1hTokens: 0,
+    totalTokens: null,
+    costNanoUsd: 0,
+    status: "error",
+  };
+  it.each([
+    {
+      rule: "a non-retryable API error is recorded once with its type and request id, then rethrown",
+      replies: [{ kind: "error", status: 400, errorType: "invalid_request_error" }] satisfies ScriptedReply[],
+      thrown: BadRequestError,
+      record: { errorType: "invalid_request_error", requestId: "req_fake_1", latencyMs: 250 },
+    },
+  ])("$rule", async ({ replies, thrown, record }) => {
+    const { fake, callLog, claude } = await setUp();
+    fake.script(...replies);
+
+    await expect(claude.send("test.error", params)).rejects.toBeInstanceOf(thrown);
+
+    expect(fake.requestCount()).toBe(replies.length);
+    expect(callLog.calls).toEqual([{ ...failed, ...record }]);
   });
 });
