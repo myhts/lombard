@@ -56,7 +56,7 @@ lines are also cheap to build well in CSS, need almost no images and stay readab
 | `--color-paper-aged` | `#e6d8b8` | Older documents, the evidence tray | — |
 | `--color-paper-edge` | `#cdbb94` | Deckle edges, fold lines, ruled lines | — |
 | `--color-ink` | `#1f1a14` | Body text, type | on paper, on paper-aged |
-| `--color-ink-soft` | `#685b48` | Secondary text, stage directions | on paper, on paper-aged |
+| `--color-ink-soft` | `#5f5341` | Secondary text, stage directions | on paper, on paper-aged, on paper-aged under the aged edges |
 | `--color-wax` | `#8c1c13` | The wax seal, stolen-goods marks, the constable | on paper |
 | `--color-prussian` | `#1f3a5f` | Links, citation marks | on paper |
 | `--color-baize` | `#2f4a3a` | The counter's cloth, an accepted pledge, approval | on paper |
@@ -67,6 +67,23 @@ lines are also cheap to build well in CSS, need almost no images and stay readab
 | `--color-glass` | `#10151a` | The instrument layer's background | — |
 | `--color-readout` | `#d7e0e6` | The instrument layer's text | on glass |
 | `--color-signal` | `#7fd1c4` | The instrument layer's highlights | on glass |
+
+**Soft ink on aged paper** (settled in #46). Text on an aged `Sheet` stays `p-4` (16px) or more from every edge, and
+soft ink is `#5f5341`.
+
+- **Why both.** The aged edges darken the paper towards each edge, most of all in the bottom-right corner, and they
+  haven't quite faded out 16px in. With the rule alone, the earlier `#685b48` passed in that corner by less than 0.1. A
+  soft ink dark enough to need no rule (`#554b3b`) would make every stage direction, waiting saying and placeholder
+  heavier, to cover a place where no piece sets text. `#5f5341` stays visibly soft and is 6.1 to 1 on paper, 5.3 on
+  flat aged paper and 5.2 in that corner at `p-4`.
+- **The builder of a piece keeps the rule.** `Sheet` leaves its padding to its caller, and the rule has no token. A
+  piece on an aged sheet sets `p-4` or more.
+- **What the contrast test checks.** It works out the paper's colour `p-4` in on the four sides and in the four
+  corners, from `--inset-shadow-aged-edges`, `--spacing` and the colours in the stylesheet, and asks for 4.5 to 1
+  against soft ink. It fails once a lighter soft ink, heavier or wider aged edges, or a smaller clearance takes any of
+  those places under 4.5.
+  - It takes the paper's average colour, so the laid texture stays out of its sums.
+  - It can't see a browser whose blur differs from the CSS specification's, or a piece that ignores the rule.
 
 **Type tokens:**
 
@@ -95,7 +112,7 @@ opacity the waiting pulse's mark fades to).
 | Effect | How | Where | Off when |
 |---|---|---|---|
 | Laid paper | An inline SVG `feTurbulence` noise at low opacity over the paper colour, plus faint horizontal lines from a repeating gradient | Every paper surface | Never; it's static |
-| Aged edges | An inset shadow in paper-edge, slightly uneven | Clippings, handbills, pawn tickets | Never |
+| Aged edges | An inset shadow in paper-edge, slightly uneven: heaviest at the bottom right | Clippings, handbills, pawn tickets. Text on them stays `p-4` or more from every edge ("Soft ink on aged paper") | Never |
 | Pressed type | A very light text shadow so the ink looks pressed into the paper | Display type only, never body text | Never |
 | Oak and baize | Layered gradients for grain and cloth | The page background and the counter | Never |
 | Candlelight | One fixed overlay: a warm radial gradient whose opacity and position drift on a slow, irregular keyframe loop, with a dark vignette at the edges | The period layer's page | Reduced motion, plain mode, and whenever the instrument panel is open over it |
@@ -115,7 +132,7 @@ and the fix when a phone struggles.
 
 | Piece | What it is in 1753 | Shows | States |
 |---|---|---|---|
-| `Sheet` | A sheet of paper lying on the counter | Any content; the base for most others | plain, aged, lifted |
+| `Sheet` | A sheet of paper lying on the counter | Any content; the base for most others. Its caller sets the padding: `p-4` or more on an aged sheet ("Soft ink on aged paper") | plain, aged, lifted |
 | `Rule`, `Fleuron` | A printer's rule and a printer's flower, as hand-coded SVG | Dividers and ornaments | thin, double, with flower |
 | `ShopSign` | The pawnbroker's three gilt balls hanging from a wrought-iron bar | The shop's name | open, closed |
 | `Dialogue` | A printed dialogue, set like the question-and-answer text of the Proceedings: the speaker's name, then the words | The conversation. No chat bubbles | pawnbroker line, customer line, streaming, waiting with a saying, stage direction |

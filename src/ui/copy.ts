@@ -66,6 +66,7 @@ export const copy = {
       aged: "Aged",
       lifted: "Lifted",
       sample: "Laid paper under pressed display type. This line is body text, and is not pressed.",
+      softInk: "Soft ink, as near the aged edges as a piece may set it.",
     },
     rule: { heading: "Rules and Flowers", thin: "Thin", double: "Double", flower: "With flower", fleuron: "Fleuron" },
     shopSign: { heading: "The Shop Sign", open: "Open", closed: "Closed", name: "The Three Balls" },
