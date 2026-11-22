@@ -1,7 +1,7 @@
 import type { MessageCreateParamsNonStreaming } from "@anthropic-ai/sdk/resources/messages";
 import { afterEach, describe, expect, it } from "vitest";
 import { InMemoryCallLog } from "@/engine/call-log";
-import { createAnthropicClient, createClaudeWrapper } from "@/engine/claude";
+import { createAnthropicClient, createClaudeWrapper, UnpricedModelError } from "@/engine/claude";
 import { startModelFake } from "../model-fake";
 
 // Each test's fake, closed after it.
@@ -75,5 +75,15 @@ describe("the Claude wrapper", () => {
     await claude.send("test.tier", params);
 
     expect(callLog.calls[0]?.costNanoUsd).toBe(cost);
+  });
+
+  it("refuses a model with no price before any request, and records nothing", async () => {
+    const { fake, callLog, claude } = await setUp();
+
+    const sending = claude.send("test.unpriced", { ...params, model: "claude-unpriced-0" });
+
+    await expect(sending).rejects.toThrow(new UnpricedModelError("claude-unpriced-0"));
+    expect(fake.requestCount()).toBe(0);
+    expect(callLog.calls).toEqual([]);
   });
 });

@@ -9,6 +9,14 @@ export function createAnthropicClient({ apiKey, baseURL }: { apiKey: string; bas
   return new Anthropic({ apiKey, baseURL });
 }
 
+/** Thrown before any request when the price table has no price for the model, so no call goes unmetered. */
+export class UnpricedModelError extends Error {
+  override name = "UnpricedModelError";
+  constructor(readonly model: string) {
+    super(`no price for model ${model}: add it to PRICES before sending to it`);
+  }
+}
+
 // SDK nulls count as 0. Without the 5-minute/1-hour split, every cache write counts as a 5-minute one (#6).
 function toTokenUsage(usage: Usage): TokenUsage {
   const writes = usage.cache_creation;
@@ -28,7 +36,7 @@ export function createClaudeWrapper({ client, callLog, clock = systemClock }: Cl
   return {
     async send(purpose: string, params: MessageCreateParamsNonStreaming): Promise<Message> {
       const price = priceFor(params.model);
-      if (!price) throw new Error(`no price for model ${params.model}, so it can't be sent`);
+      if (!price) throw new UnpricedModelError(params.model);
       const started = clock.now();
       const { data: message, request_id } = await client.messages.create(params).withResponse();
       const latencyMs = Math.round(clock.now() - started); // performance.now() has fractions of a millisecond
