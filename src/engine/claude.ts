@@ -1,3 +1,4 @@
+import "server-only";
 import Anthropic, {
   APIConnectionError,
   APIConnectionTimeoutError,
