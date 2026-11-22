@@ -58,6 +58,7 @@ any other work, choose the path by size:
 - **Tiny change** (one idea, easy to redo): make it, then open a PR.
 - **Anything bigger:** `/grill-with-docs` first; for an event-driven domain it also loads `event-storming`.
 - **Bigger than one session, or foggy:** `/wayfinder`, then `/to-spec` and `/to-tickets`.
-- **Each ticket:** `/implement <ticket>`. **Each PR:** `/human-review <PR>`, then the human merges.
+- **Each ticket:** `/implement <ticket>`, then `/ticket-notes <ticket>` once its PR is open. **Each PR:**
+  `/human-review <PR>`, then the human merges.
 - **Between phases:** continue if the next phase needs this one's reasoning; otherwise clear, hand off, use a subagent
   or compact, in that order.
