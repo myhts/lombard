@@ -77,7 +77,14 @@ export function createClaudeWrapper({ client, callLog, clock = systemClock }: Cl
       } catch (error) {
         // Recorded after the SDK's last retry, with zero tokens; the caller still gets the SDK's own error.
         const requestId = error instanceof APIError ? (error.requestID ?? null) : null;
-        await record(NO_TOKENS, { status: "error", errorType: errorTypeOf(error), requestId });
+        await record(NO_TOKENS, { status: "error", errorType: errorTypeOf(error), requestId }).catch(
+          (logError: unknown) => {
+            // The call log's failure still propagates (#6), but carries the SDK's error so neither is lost.
+            throw new AggregateError([logError, error], "the call log failed to record a failed call", {
+              cause: error,
+            });
+          },
+        );
         throw error;
       }
       const { data: message, request_id } = response;

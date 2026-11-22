@@ -12,11 +12,10 @@ afterEach(async () => {
 });
 
 // Seam 2: the wrapper's public interface, with an in-memory call log and a real client pointed at the HTTP model fake.
-async function setUp() {
+async function setUp(callLog = new InMemoryCallLog()) {
   let now = 0;
   const fake = await startModelFake({ onRequest: () => void (now += 250) }); // each request takes 250 ms
   const client = createAnthropicClient({ apiKey: "test-key", baseURL: fake.baseUrl });
-  const callLog = new InMemoryCallLog();
   const claude = createClaudeWrapper({ client, callLog, clock: { now: () => now } });
   closers.push(() => fake.close());
   return { fake, callLog, claude };
@@ -162,5 +161,16 @@ describe("the Claude wrapper", () => {
 
     expect(fake.requestCount()).toBe(replies.length);
     expect(callLog.calls).toEqual([{ ...failed, ...record }]);
+  });
+
+  it("throws the call log's failure on a failed call, keeping the SDK's error as its cause", async () => {
+    const logDown = new Error("call log down");
+    const { fake, claude } = await setUp({ calls: [], record: () => Promise.reject(logDown) });
+    fake.script({ kind: "error", status: 400, errorType: "invalid_request_error" });
+
+    const sending = claude.send("test.error", params);
+
+    await expect(sending).rejects.toHaveProperty("errors", [logDown, expect.any(BadRequestError)]);
+    await expect(sending).rejects.toHaveProperty("cause", expect.any(BadRequestError));
   });
 });
