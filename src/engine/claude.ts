@@ -1,4 +1,9 @@
-import Anthropic, { APIError } from "@anthropic-ai/sdk";
+import Anthropic, {
+  APIConnectionError,
+  APIConnectionTimeoutError,
+  APIError,
+  APIUserAbortError,
+} from "@anthropic-ai/sdk";
 import type { Message, MessageCreateParamsNonStreaming, Usage } from "@anthropic-ai/sdk/resources/messages";
 import type { CallLog, CallRecord } from "./call-log";
 import { systemClock, type Clock } from "./clock";
@@ -31,10 +36,14 @@ function toTokenUsage(usage: Usage): TokenUsage {
 
 const NO_TOKENS: TokenUsage = { input: 0, output: 0, cacheRead: 0, write5m: 0, write1h: 0 };
 
-// The API's error type (e.g. `rate_limit_error`) when there is one, else the error's class (`APIConnectionError`).
+// The API's error type (e.g. `rate_limit_error`) when there is one, else a fixed name for the SDK's errors that come
+// with no response. Fixed strings, not class names: a minified build renames the classes.
 function errorTypeOf(error: unknown): string {
   if (error instanceof APIError && error.type) return error.type;
-  return error instanceof Error ? error.constructor.name : typeof error;
+  if (error instanceof APIConnectionTimeoutError) return "APIConnectionTimeoutError"; // before its parent class
+  if (error instanceof APIConnectionError) return "APIConnectionError";
+  if (error instanceof APIUserAbortError) return "APIUserAbortError";
+  return "unknown_error";
 }
 
 export type ClaudeWrapperDeps = { client: Anthropic; callLog: CallLog; clock?: Clock };
