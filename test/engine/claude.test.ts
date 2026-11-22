@@ -61,6 +61,16 @@ describe("the Claude wrapper", () => {
     expect(callLog.calls[0]).toEqual(sent);
   });
 
+  it("counts every cache write as a 5-minute one when the response doesn't split them by duration", async () => {
+    const { fake, callLog, claude } = await setUp();
+    fake.script({ kind: "success", usage, noCacheBreakdown: true });
+
+    await claude.send("test.success", params);
+
+    // All 11 + 13 writes at the 5-minute price: 31×100 + 51×500 + 7×10 + 24×125
+    expect(callLog.calls).toEqual([{ ...sent, cacheWrite5mTokens: 24, cacheWrite1hTokens: 0, costNanoUsd: 31_670 }]);
+  });
+
   it("records a call retried after a retryable error once, with the latency of both attempts", async () => {
     const { fake, callLog, claude } = await setUp();
     fake.script(

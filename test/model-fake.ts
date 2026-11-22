@@ -8,7 +8,8 @@ import { z } from "zod";
 export type ScriptedUsage = { input: number; output: number; cacheRead: number; write5m: number; write1h: number };
 // Tagged by `kind`: a success, an API error (`retryable` lets the SDK retry it), or a connection dropped unanswered.
 export type ScriptedReply =
-  | { kind: "success"; usage: ScriptedUsage; stopReason?: StopReason }
+  // `noCacheBreakdown` sends `cache_creation: null`, as the SDK's `Usage` type allows: only the total of cache writes.
+  | { kind: "success"; usage: ScriptedUsage; stopReason?: StopReason; noCacheBreakdown?: boolean }
   | { kind: "error"; status: number; errorType: ErrorType; retryable?: boolean }
   | { kind: "drop" };
 /** A real HTTP server standing in for the Claude Messages API; each test scripts its replies in order.
@@ -49,7 +50,9 @@ export async function startModelFake({ onRequest }: { onRequest?: () => void } =
         input_tokens: input,
         cache_creation_input_tokens: write5m + write1h,
         cache_read_input_tokens: cacheRead,
-        cache_creation: { ephemeral_5m_input_tokens: write5m, ephemeral_1h_input_tokens: write1h },
+        cache_creation: reply.noCacheBreakdown
+          ? null
+          : { ephemeral_5m_input_tokens: write5m, ephemeral_1h_input_tokens: write1h },
         output_tokens: output,
         output_tokens_details: { thinking_tokens: 0 },
         service_tier: "standard",
