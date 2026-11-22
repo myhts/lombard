@@ -174,3 +174,14 @@ describe("the Claude wrapper", () => {
     await expect(sending).rejects.toHaveProperty("cause", expect.any(BadRequestError));
   });
 });
+
+describe("the Anthropic client factory", () => {
+  it("sets the options the environment could otherwise change, and refuses redirects", () => {
+    const client = createAnthropicClient({ apiKey: "test-key", baseURL: "http://127.0.0.1:1" });
+
+    expect(client.logLevel).toBe("warn");
+    expect(client.openTelemetry.traces.contentMode).toBe("metadata_only");
+    expect(client.webhookKey).toBeNull();
+    expect(client.fetchOptions?.redirect).toBe("error"); // the x-api-key header must never follow a redirect
+  });
+});
