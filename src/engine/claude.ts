@@ -10,9 +10,17 @@ import type { CallLog, CallRecord } from "./call-log";
 import { systemClock, type Clock } from "./clock";
 import { costNanoUsd, priceFor, type TokenUsage } from "./prices";
 
-// Both options always explicit, so the SDK never falls back to environment variables or an `ant` profile.
+// Every option the SDK would otherwise take from the environment is set here, so the environment can't change the
+// credentials or profile, the host, the log level or what traces carry. `ANTHROPIC_CUSTOM_HEADERS` has no off switch.
 export function createAnthropicClient({ apiKey, baseURL }: { apiKey: string; baseURL: string }): Anthropic {
-  return new Anthropic({ apiKey, baseURL });
+  return new Anthropic({
+    apiKey,
+    baseURL,
+    logLevel: "warn",
+    openTelemetry: { traces: { contentMode: "metadata_only" } }, // spans, if any, never hold prompts or replies
+    webhookKey: null,
+    fetchOptions: { redirect: "error" }, // a redirect would carry the API key to another host
+  });
 }
 
 /** Thrown before any request when the price table has no price for the model, so no call goes unmetered. */
