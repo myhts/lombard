@@ -18,3 +18,16 @@ The setting that removes the candle, the vignette and every animation. Its switc
 
 **Behind the counter**:
 The instrument layer's panel, showing what the AI saw and did.
+
+**Cost meter**:
+The engine code that prices each model call at list price, in integer nano-dollars, and records it in the call log.
+
+**Call log**:
+Where the cost meter writes one record per logical model call, after the SDK's retries: tokens by kind, cost, latency,
+status and request id, never the prompt or the response text.
+
+**Claude wrapper**:
+The engine code that sends Claude messages through the cost meter.
+
+**Purpose**:
+The label the caller gives a model call, saying what it was for, so the call log can group spend by it.

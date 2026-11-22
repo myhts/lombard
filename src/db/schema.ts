@@ -1,7 +1,8 @@
 import { bigint, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 // One row per logical Claude or Voyage call, written by the cost meter after the SDK's retries. It never holds prompt
-// or response text. Token columns a provider doesn't report stay null: Claude has no total, Voyage has only a total.
+// or response text. A null token column means the provider never reports that kind (Claude has no total, Voyage has
+// only a total). A failed call's row holds zero tokens of the kinds its provider reports, and zero cost.
 export const llmCalls = pgTable("llm_calls", {
   id: bigint({ mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
