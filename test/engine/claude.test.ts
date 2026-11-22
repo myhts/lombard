@@ -1,5 +1,5 @@
 import type { MessageCreateParamsNonStreaming } from "@anthropic-ai/sdk/resources/messages";
-import { BadRequestError } from "@anthropic-ai/sdk";
+import { APIConnectionError, BadRequestError, InternalServerError } from "@anthropic-ai/sdk";
 import { afterEach, describe, expect, it } from "vitest";
 import { InMemoryCallLog } from "@/engine/call-log";
 import { createAnthropicClient, createClaudeWrapper, UnpricedModelError } from "@/engine/claude";
@@ -28,33 +28,50 @@ const params: MessageCreateParamsNonStreaming = {
   messages: [{ role: "user", content: "Good day." }],
 };
 
+// One success, scripted with every token kind, and the record it should produce.
+const usage = { input: 31, output: 51, cacheRead: 7, write5m: 11, write1h: 13 };
+const sent = {
+  provider: "anthropic",
+  model: "claude-haiku-5-5",
+  operation: "messages",
+  purpose: "test.success",
+  inputTokens: 31,
+  outputTokens: 51,
+  cacheReadTokens: 7,
+  cacheWrite5mTokens: 11,
+  cacheWrite1hTokens: 13,
+  totalTokens: null,
+  costNanoUsd: 32_645, // 31×100 + 51×500 + 7×10 + 11×125 + 13×200 = 3,100 + 25,500 + 70 + 1,375 + 2,600
+  latencyMs: 250,
+  status: "ok",
+  errorType: null,
+  requestId: "req_fake_1",
+};
+
 describe("the Claude wrapper", () => {
   it("records one call with its tokens, cost, latency and request id, and returns the message", async () => {
     const { fake, callLog, claude } = await setUp();
-    fake.script({ kind: "success", usage: { input: 31, output: 51, cacheRead: 7, write5m: 11, write1h: 13 } });
+    fake.script({ kind: "success", usage });
 
     const message = await claude.send("test.success", params);
 
     expect(message.id).toBe("msg_fake_1");
     expect(fake.requestCount()).toBe(1);
     expect(callLog.calls).toHaveLength(1);
-    expect(callLog.calls[0]).toEqual({
-      provider: "anthropic",
-      model: "claude-haiku-5-5",
-      operation: "messages",
-      purpose: "test.success",
-      inputTokens: 31,
-      outputTokens: 51,
-      cacheReadTokens: 7,
-      cacheWrite5mTokens: 11,
-      cacheWrite1hTokens: 13,
-      totalTokens: null,
-      costNanoUsd: 32_645, // 31×100 + 51×500 + 7×10 + 11×125 + 13×200 = 3,100 + 25,500 + 70 + 1,375 + 2,600
-      latencyMs: 250,
-      status: "ok",
-      errorType: null,
-      requestId: "req_fake_1",
-    });
+    expect(callLog.calls[0]).toEqual(sent);
+  });
+
+  it("records a call retried after a retryable error once, with the latency of both attempts", async () => {
+    const { fake, callLog, claude } = await setUp();
+    fake.script(
+      { kind: "error", status: 529, errorType: "overloaded_error", retryable: true },
+      { kind: "success", usage },
+    );
+
+    await claude.send("test.success", params);
+
+    expect(fake.requestCount()).toBe(2);
+    expect(callLog.calls).toEqual([{ ...sent, latencyMs: 500, requestId: "req_fake_2" }]);
   });
 
   // The tier counts input + cache reads + cache writes, not output: 1,000 output tokens would tip the first case over.
@@ -109,6 +126,23 @@ describe("the Claude wrapper", () => {
       replies: [{ kind: "error", status: 400, errorType: "invalid_request_error" }] satisfies ScriptedReply[],
       thrown: BadRequestError,
       record: { errorType: "invalid_request_error", requestId: "req_fake_1", latencyMs: 250 },
+    },
+    {
+      rule: "a retryable error that outlasts the retries is recorded once, with the last attempt's request id",
+      replies: Array<ScriptedReply>(3).fill({
+        kind: "error",
+        status: 529,
+        errorType: "overloaded_error",
+        retryable: true,
+      }),
+      thrown: InternalServerError,
+      record: { errorType: "overloaded_error", requestId: "req_fake_3", latencyMs: 750 },
+    },
+    {
+      rule: "a connection dropped on every attempt is recorded once by its error class, with no request id",
+      replies: Array<ScriptedReply>(3).fill({ kind: "drop" }),
+      thrown: APIConnectionError,
+      record: { errorType: "APIConnectionError", requestId: null, latencyMs: 750 },
     },
   ])("$rule", async ({ replies, thrown, record }) => {
     const { fake, callLog, claude } = await setUp();
