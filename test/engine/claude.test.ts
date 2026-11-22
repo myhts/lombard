@@ -55,4 +55,25 @@ describe("the Claude wrapper", () => {
       requestId: "req_fake_1",
     });
   });
+
+  // The tier counts input + cache reads + cache writes, not output: 1,000 output tokens would tip the first case over.
+  it.each([
+    {
+      rule: "a prompt of exactly 100,000 tokens is billed at the normal tier",
+      input: 99_970,
+      cost: 10_500_350, // 99,970×100 + 10×10 + 10×125 + 10×200 + 1,000×500
+    },
+    {
+      rule: "a prompt over 100,000 tokens is billed at the long tier, output included",
+      input: 99_971,
+      cost: 52_502_250, // 99,971×500 + 10×50 + 10×625 + 10×1,000 + 1,000×2,500
+    },
+  ])("$rule", async ({ input, cost }) => {
+    const { fake, callLog, claude } = await setUp();
+    fake.script({ kind: "success", usage: { input, output: 1_000, cacheRead: 10, write5m: 10, write1h: 10 } });
+
+    await claude.send("test.tier", params);
+
+    expect(callLog.calls[0]?.costNanoUsd).toBe(cost);
+  });
 });
