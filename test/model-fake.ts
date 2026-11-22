@@ -5,6 +5,7 @@ import type { Message, StopReason } from "@anthropic-ai/sdk/resources/messages";
 import type { ErrorResponse, ErrorType } from "@anthropic-ai/sdk/resources/shared";
 import { z } from "zod";
 
+// Separate from the engine's `TokenUsage` on purpose: the fake describes the API, not the engine.
 export type ScriptedUsage = { input: number; output: number; cacheRead: number; write5m: number; write1h: number };
 // Tagged by `kind`: a success, an API error (`retryable` lets the SDK retry it), or a connection dropped unanswered.
 export type ScriptedReply =
